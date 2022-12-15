@@ -19,7 +19,7 @@ export class User {
   @Column("text", { select: false })
   password: string;
 
-  @Column("text")
+  @Column("text", { nullable: true })
   fullName: string;
 
   @Column("bool", { default: true })
