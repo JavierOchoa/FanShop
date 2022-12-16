@@ -4,9 +4,11 @@ import {
   Column,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { User } from "./User";
+import { ProductImage } from "./ProductImage";
 
 @Entity()
 export class Product {
@@ -20,7 +22,7 @@ export class Product {
   price: number;
 
   @Column("text", { nullable: true })
-  description: true;
+  description: string;
 
   @Column("text", { unique: true })
   slug: string;
@@ -40,22 +42,22 @@ export class Product {
   @ManyToOne(() => User, (user) => user.product, { eager: true })
   user: User;
 
+  @OneToMany(() => ProductImage, (productImage) => productImage.product, {
+    cascade: true,
+    eager: true,
+  })
+  images: ProductImage[];
+
   @BeforeInsert()
   checkSlugInsert() {
     if (!this.slug) {
       this.slug = this.title;
-      this.slug = this.slug
-        .toLowerCase()
-        .replaceAll(" ", "_")
-        .replaceAll("'", "");
+      this.slug = this.slug.toLowerCase().replaceAll(" ", "_").replaceAll("'", "");
     }
   }
 
   @BeforeUpdate()
   checkSlugUpdate() {
-    this.slug = this.slug
-      .toLowerCase()
-      .replaceAll(" ", "_")
-      .replaceAll("'", "");
+    this.slug = this.slug.toLowerCase().replaceAll(" ", "_").replaceAll("'", "");
   }
 }

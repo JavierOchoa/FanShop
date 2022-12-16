@@ -1,11 +1,10 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
-import { AppDataSource } from "../../../appDataSource";
+import { userRepository } from "../../../appDataSource";
 import { User } from "../../../appDataSource/entity";
 import jwt from "jsonwebtoken";
 
 export const authRouter = Router();
-const userRepository = AppDataSource.getRepository(User);
 
 authRouter.post("/signup", async (req, res) => {
   const { email, fullName, password } = req.body;
@@ -31,7 +30,10 @@ authRouter.post("/login", async (req, res) => {
     return;
   }
   try {
-    const userOnDB = await userRepository.findOne({ where: { email }, select: { password: true } });
+    const userOnDB = await userRepository.findOne({
+      where: { email },
+      select: { id: true, password: true },
+    });
     if (!userOnDB) {
       res.send(responseRouter(false, "User doesn't exists"));
       return;
