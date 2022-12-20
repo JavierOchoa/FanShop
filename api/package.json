@@ -6,7 +6,9 @@
   "scripts": {
     "tsc": "tsc",
     "dev": "ts-node-dev index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pgup": "docker-compose -f docker-compose-pg.yaml up -d",
+    "pgdown": "docker-compose -f docker-compose-pg.yaml down"
   },
   "keywords": [],
   "author": "Javier Ochoa",
