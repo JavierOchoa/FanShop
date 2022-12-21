@@ -20,3 +20,5 @@ productsAdminRouter.get("/", async (req, res) => {
     console.log(err);
   }
 });
+
+// productsAdminRouter.get("/edit");

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
-import { userRepository } from "../../../appDataSource";
-import { User } from "../../../appDataSource/entity";
+import { userRepository } from "../../appDataSource";
+import { User } from "../../appDataSource/entity";
 import jwt from "jsonwebtoken";
 
 export const authRouter = Router();
