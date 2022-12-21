@@ -4,9 +4,9 @@ export const ligthTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      light: "#fff",
-      main: "#fff",
-      dark: "#fafafa",
+      main: "#00796b",
+      light: "#26a69a",
+      dark: "#00695c",
     },
   },
 });

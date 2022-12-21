@@ -25,6 +25,9 @@ import { visuallyHidden } from "@mui/utils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { useGetProductsQuery } from "./../../redux/services";
+import { EditProductDialog } from "../../components/admin";
+import { useAppSelector, useAppDispatch } from "../../utils/hooks";
+import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
 
 interface HeadCell {
   disablePadding: boolean;
@@ -32,27 +35,6 @@ interface HeadCell {
   label: string;
   numeric: boolean;
 }
-
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
-  return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-type Order = "asc" | "desc";
 
 interface EnhancedTableProps {
   numSelected: number;
@@ -94,7 +76,6 @@ interface EnhancedTableToolbarProps {
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   const { tableToolbarTitle, numSelected } = props;
-  // TODO: change color themes
   return (
     <Toolbar
       sx={{
@@ -115,15 +96,14 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           {tableToolbarTitle}
         </Typography>
       )}
-      {numSelected > 0 ? (
+      {numSelected > 0 && (
         <Tooltip title="Delete">
           <IconButton>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
-      ) : (
-        <></>
       )}
+      {/* TODO: New Product */}
     </Toolbar>
   );
 }
@@ -141,14 +121,14 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputProps={{
-              "aria-label": "select all desserts",
+              "aria-label": "select all products",
             }}
           />
         </TableCell>
-        {headCells.map((headCell) => (
+        {headCells.map((headCell, index) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
+            align={index > 0 ? "right" : "left"}
             padding={headCell.disablePadding ? "none" : "normal"}
           >
             {headCell.label}
@@ -160,10 +140,18 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 export default function AdminPanel() {
+  const dispatch = useAppDispatch();
   const { data: rows, isLoading: loadingProducts } = useGetProductsQuery();
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(15);
+  const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
+  // const [openEditDialog, setOpenEditDialog] = React.useState(false);
+
+  const handleOpenEditDialog = () => {
+    dispatch(changeOpenEditDialogStatus());
+    console.log(openEditDialog);
+  };
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -174,7 +162,7 @@ export default function AdminPanel() {
     setSelected([]);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
+  const handleClick = (event: React.ChangeEvent<HTMLInputElement>, name: string) => {
     const selectedIndex = selected.indexOf(name);
     let newSelected: readonly string[] = [];
 
@@ -232,7 +220,7 @@ export default function AdminPanel() {
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleClick(event, row.title)}
+                        onClick={handleOpenEditDialog}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
@@ -243,6 +231,7 @@ export default function AdminPanel() {
                           <Checkbox
                             color="primary"
                             checked={isItemSelected}
+                            onChange={(event) => handleClick(event, row.title)}
                             inputProps={{
                               "aria-labelledby": labelId,
                             }}
@@ -280,6 +269,7 @@ export default function AdminPanel() {
           />
         </Paper>
       </Box>
+      <EditProductDialog openStatus={openEditDialog} />
     </AdminLayout>
   );
 }
