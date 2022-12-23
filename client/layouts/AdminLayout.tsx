@@ -1,7 +1,8 @@
 import { Toolbar, Box } from "@mui/material";
 import Head from "next/head";
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, useEffect } from "react";
 import { AdminNav, AdminDrawer } from "../components/admin";
+import useAuth from "../utils/hooks/useAuth";
 
 interface Props {
   title: string;
@@ -15,6 +16,10 @@ export const AdminLayout: FC<PropsWithChildren<Props>> = ({
   pageDescription,
   imageFullUrl,
 }) => {
+  const { isLoading, isAuthenticated } = useAuth();
+  useEffect(() => {
+    if (isAuthenticated) console.log("autehd");
+  }, [isAuthenticated]);
   return (
     <>
       <Head>

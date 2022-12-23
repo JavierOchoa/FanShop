@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   alpha,
   Box,
@@ -24,7 +24,7 @@ import { ProductAdminReponse } from "../../interfaces";
 import { visuallyHidden } from "@mui/utils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { useGetProductsQuery } from "./../../redux/services";
+import { useGetProductsMutation } from "./../../redux/services";
 import { EditProductDialog } from "../../components/admin";
 import { useAppSelector, useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
@@ -141,13 +141,15 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function AdminPanel() {
   const dispatch = useAppDispatch();
-  const { data: rows, isLoading: loadingProducts } = useGetProductsQuery();
+  const [attemptAccess, { data: rows, isLoading: loadingProducts }] = useGetProductsMutation();
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(15);
   const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
   // const [openEditDialog, setOpenEditDialog] = React.useState(false);
-
+  useEffect(() => {
+    attemptAccess();
+  }, []);
   const handleOpenEditDialog = () => {
     dispatch(changeOpenEditDialogStatus());
     console.log(openEditDialog);
@@ -196,8 +198,8 @@ export default function AdminPanel() {
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows!.length) : 0;
 
+  console.log(rows);
   if (rows === undefined) return <></>;
-
   return (
     <AdminLayout title="Admin Panel" pageDescription="Admin panel for FanShop">
       <Box sx={{ width: "100%" }}>
