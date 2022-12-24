@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { getCookie, setCookie } from "typescript-cookie";
+import { getCookie, removeCookie, setCookie } from "typescript-cookie";
 import { useAppSelector, useAppDispatch } from "./../hooks";
 import { setToken, setUser } from "./../../redux/slices";
-import { useGetUserInfoMutation } from "../../redux/services";
+import { useGetUserInfoMutation, useLoginMutation } from "../../redux/services";
+import { LoginRequest } from "./../../interfaces";
+import { useRouter } from "next/router";
 
 export default function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -10,11 +12,16 @@ export default function useAuth() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const [getUserInfo, { data: userInfo, isLoading: gettingUserInfo }] = useGetUserInfoMutation();
+  const [login, { isLoading: loginRequestLoading }] = useLoginMutation();
+  const router = useRouter();
   useEffect(() => {
     const storedCookie = getCookie("fsToken");
     if (storedCookie && user === null) {
       dispatch(setToken(storedCookie));
       getUserInfo();
+    } else {
+      setIsAuthenticated(false);
+      setIsLoading(false);
     }
   }, []);
 
@@ -25,5 +32,19 @@ export default function useAuth() {
       setIsLoading(false);
     }
   }, [userInfo]);
-  return { isAuthenticated, isLoading };
+
+  const userLogin = async (credentials: LoginRequest) => {
+    const data = await login(credentials).unwrap();
+    if (data.token) {
+      setCookie("fsToken", data.token, { expires: 8 });
+      dispatch(setToken(data.token));
+    }
+    return data;
+  };
+
+  const userLogout = () => {
+    removeCookie("fsToken");
+    router.reload();
+  };
+  return { isAuthenticated, isLoading, user, loginRequestLoading, userLogin, userLogout };
 }

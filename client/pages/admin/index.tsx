@@ -6,6 +6,7 @@ import {
   FormControlLabel,
   IconButton,
   Paper,
+  Skeleton,
   Switch,
   Table,
   TableBody,
@@ -28,6 +29,7 @@ import { useGetProductsMutation } from "./../../redux/services";
 import { EditProductDialog } from "../../components/admin";
 import { useAppSelector, useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
+import useAdmin from "../../utils/hooks/useAdmin";
 
 interface HeadCell {
   disablePadding: boolean;
@@ -141,23 +143,19 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function AdminPanel() {
   const dispatch = useAppDispatch();
-  const [attemptAccess, { data: rows, isLoading: loadingProducts }] = useGetProductsMutation();
+  const { loadingProducts, productList } = useAdmin();
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(15);
   const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
-  // const [openEditDialog, setOpenEditDialog] = React.useState(false);
-  useEffect(() => {
-    attemptAccess();
-  }, []);
+
   const handleOpenEditDialog = () => {
     dispatch(changeOpenEditDialogStatus());
-    console.log(openEditDialog);
   };
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = rows!.map((n) => n.title);
+      const newSelected = productList!.map((n) => n.title);
       setSelected(newSelected);
       return;
     }
@@ -195,11 +193,9 @@ export default function AdminPanel() {
 
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows!.length) : 0;
+  // Avoid a layout jump when reaching the last page with empty productList.
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - productList!.length) : 0;
 
-  console.log(rows);
-  if (rows === undefined) return <></>;
   return (
     <AdminLayout title="Admin Panel" pageDescription="Admin panel for FanShop">
       <Box sx={{ width: "100%" }}>
@@ -210,44 +206,54 @@ export default function AdminPanel() {
               <EnhancedTableHead
                 numSelected={selected.length}
                 onSelectAllClick={handleSelectAllClick}
-                rowCount={rows!.length}
+                rowCount={!productList ? 0 : productList.length}
               />
               <TableBody>
-                {rows
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => {
-                    const isItemSelected = isSelected(row.title);
-                    const labelId = `enhanced-table-checkbox-${index}`;
+                {productList
+                  ? productList
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((product, index) => {
+                        const isItemSelected = isSelected(product.title);
+                        const labelId = `enhanced-table-checkbox-${index}`;
 
-                    return (
-                      <TableRow
-                        hover
-                        onClick={handleOpenEditDialog}
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={row.title}
-                        selected={isItemSelected}
-                      >
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            color="primary"
-                            checked={isItemSelected}
-                            onChange={(event) => handleClick(event, row.title)}
-                            inputProps={{
-                              "aria-labelledby": labelId,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell component="th" id={labelId} scope="row" padding="none">
-                          {row.title}
-                        </TableCell>
-                        <TableCell align="right">{row.price}</TableCell>
-                        <TableCell align="right">{row.stock}</TableCell>
-                        <TableCell align="right">{row.user.fullName}</TableCell>
-                      </TableRow>
-                    );
-                  })}
+                        return (
+                          <TableRow
+                            hover
+                            onClick={handleOpenEditDialog}
+                            role="checkbox"
+                            aria-checked={isItemSelected}
+                            tabIndex={-1}
+                            key={product.title}
+                            selected={isItemSelected}
+                          >
+                            <TableCell padding="checkbox">
+                              <Checkbox
+                                color="primary"
+                                checked={isItemSelected}
+                                onChange={(event) => handleClick(event, product.title)}
+                                inputProps={{
+                                  "aria-labelledby": labelId,
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell component="th" id={labelId} scope="product" padding="none">
+                              {product.title}
+                            </TableCell>
+                            <TableCell align="right">{product.price}</TableCell>
+                            <TableCell align="right">{product.stock}</TableCell>
+                            <TableCell align="right">{product.user.fullName}</TableCell>
+                          </TableRow>
+                        );
+                      })
+                  : Array(rowsPerPage)
+                      .fill(<Skeleton animation="wave" width={50} />)
+                      .map((skeleton, i) => {
+                        return (
+                          <TableRow key={i}>
+                            <TableCell>{skeleton}</TableCell>
+                          </TableRow>
+                        );
+                      })}
                 {emptyRows > 0 && (
                   <TableRow
                     style={{
@@ -260,15 +266,19 @@ export default function AdminPanel() {
               </TableBody>
             </Table>
           </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[15, 25, 35]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          {productList ? (
+            <TablePagination
+              rowsPerPageOptions={[15, 25, 35]}
+              component="div"
+              count={productList.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          ) : (
+            <></>
+          )}
         </Paper>
       </Box>
       <EditProductDialog openStatus={openEditDialog} />
