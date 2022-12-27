@@ -1,17 +1,27 @@
 import { useState, useEffect } from "react";
 import { useAppSelector } from ".";
-import { useGetProductsMutation } from "../../redux/services";
+import { useGetProductsMutation, useGetProductDetailsMutation } from "../../redux/services";
 
 export default function useAdmin() {
   const token = useAppSelector((state) => state.auth.token);
-  const [attemptAccess, { data: productList, isLoading: loadingProducts }] =
-    useGetProductsMutation();
+  const [getProducts, { data: productList, isLoading: loadingProducts }] = useGetProductsMutation();
+  const [getProductInfo, { isLoading: loadingProductDetails }] = useGetProductDetailsMutation();
 
   useEffect(() => {
     if (token !== null) {
-      attemptAccess();
+      getProducts();
     }
   }, [token]);
 
-  return { loadingProducts, productList };
+  const getDetailedProduct = async (productId: string) => {
+    const detailedProduct = await getProductInfo(productId).unwrap();
+    return detailedProduct;
+  };
+
+  return {
+    loadingProducts,
+    productList,
+    getDetailedProduct,
+    loadingProductDetails,
+  };
 }

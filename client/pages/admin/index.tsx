@@ -21,11 +21,11 @@ import {
   Typography,
 } from "@mui/material";
 import { AdminLayout } from "../../layouts";
-import { ProductAdminReponse } from "../../interfaces";
+import { ProductAdminReponse, DetailedProduct } from "../../interfaces";
 import { visuallyHidden } from "@mui/utils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { useGetProductsMutation } from "./../../redux/services";
+import { useGetProductsMutation, useGetProductDetailsMutation } from "./../../redux/services";
 import { EditProductDialog } from "../../components/admin";
 import { useAppSelector, useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
@@ -143,13 +143,16 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function AdminPanel() {
   const dispatch = useAppDispatch();
-  const { loadingProducts, productList } = useAdmin();
+  const { loadingProducts, productList, getDetailedProduct } = useAdmin();
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(15);
+  const [rowsPerPage, setRowsPerPage] = React.useState<number>(15);
   const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
+  const [productToEdit, setProductToEdit] = React.useState<DetailedProduct | undefined>(undefined);
 
-  const handleOpenEditDialog = () => {
+  const handleOpenEditDialog = async (productId: string) => {
+    const detailedProduct = await getDetailedProduct(productId);
+    setProductToEdit(detailedProduct);
     dispatch(changeOpenEditDialogStatus());
   };
 
@@ -219,7 +222,7 @@ export default function AdminPanel() {
                         return (
                           <TableRow
                             hover
-                            onClick={handleOpenEditDialog}
+                            // onClick={handleOpenEditDialog}
                             role="checkbox"
                             aria-checked={isItemSelected}
                             tabIndex={-1}
@@ -236,7 +239,13 @@ export default function AdminPanel() {
                                 }}
                               />
                             </TableCell>
-                            <TableCell component="th" id={labelId} scope="product" padding="none">
+                            <TableCell
+                              component="th"
+                              id={labelId}
+                              scope="product"
+                              padding="none"
+                              onClick={async () => await handleOpenEditDialog(product.id)}
+                            >
                               {product.title}
                             </TableCell>
                             <TableCell align="right">{product.price}</TableCell>
@@ -281,7 +290,7 @@ export default function AdminPanel() {
           )}
         </Paper>
       </Box>
-      <EditProductDialog openStatus={openEditDialog} />
+      <EditProductDialog openStatus={openEditDialog} product={productToEdit} />
     </AdminLayout>
   );
 }

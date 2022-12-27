@@ -1,6 +1,6 @@
-import { User } from "./user";
+import { User } from "../user";
 
-export interface Product {
+export interface DetailedProduct {
   id: string;
   title: string;
   price: number;

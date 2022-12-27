@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { ProductAdminReponse } from "../../interfaces/admin";
+import type { ProductAdminReponse, DetailedProduct } from "../../interfaces/admin";
 import { RootState } from "../store";
 
 export const adminApi = createApi({
@@ -18,7 +18,10 @@ export const adminApi = createApi({
     getProducts: builder.mutation<ProductAdminReponse[], void>({
       query: () => `/admin/products`,
     }),
+    getProductDetails: builder.mutation<DetailedProduct, string>({
+      query: (productId) => `/admin/products/` + productId,
+    }),
   }),
 });
 
-export const { useGetProductsMutation } = adminApi;
+export const { useGetProductsMutation, useGetProductDetailsMutation } = adminApi;
