@@ -9,9 +9,9 @@ export interface DetailedProduct {
   stock: number;
   sizes: Size[];
   gender: Gender;
-  tags: Tag[];
+  tags: Tag[]; //
   user?: User;
-  images: Image[];
+  images: Image[]; //
 }
 
 enum Gender {
@@ -26,7 +26,7 @@ interface Image {
   url: string;
 }
 
-enum Size {
+export enum Size {
   L = "L",
   M = "M",
   S = "S",
@@ -35,7 +35,7 @@ enum Size {
   Xxl = "XXL",
 }
 
-enum Tag {
+export enum Tag {
   Hats = "hats",
   Hoodie = "hoodie",
   Jacket = "jacket",
