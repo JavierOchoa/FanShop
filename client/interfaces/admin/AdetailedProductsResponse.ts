@@ -1,44 +1,20 @@
 import { User } from "../user";
 
 export interface DetailedProduct {
-  id: string;
+  id?: string;
   title: string;
   price: number;
   description: string;
-  slug: string;
+  slug?: string;
   stock: number;
-  sizes: Size[];
-  gender: Gender;
-  tags: Tag[]; //
+  sizes: string[];
+  gender: string;
+  tags: string[];
+  images: Image[];
   user?: User;
-  images: Image[]; //
 }
 
-enum Gender {
-  Kid = "kid",
-  Men = "men",
-  Unisex = "unisex",
-  Women = "women",
-}
-
-interface Image {
+export interface Image {
   id: string;
   url: string;
-}
-
-export enum Size {
-  L = "L",
-  M = "M",
-  S = "S",
-  Xl = "XL",
-  Xs = "XS",
-  Xxl = "XXL",
-}
-
-export enum Tag {
-  Hats = "hats",
-  Hoodie = "hoodie",
-  Jacket = "jacket",
-  Shirt = "shirt",
-  Sweatshirt = "sweatshirt",
 }

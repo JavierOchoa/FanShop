@@ -1,9 +1,8 @@
-import { FC, PropsWithChildren } from "react";
+import { ChangeEvent, createRef, FC, PropsWithChildren, useEffect, useState } from "react";
 import {
   Box,
   Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -11,13 +10,11 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
-  Grid,
   IconButton,
   ImageList,
   ImageListItem,
   InputAdornment,
   InputLabel,
-  OutlinedInput,
   Radio,
   RadioGroup,
   Stack,
@@ -25,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, Delete } from "@mui/icons-material";
-import { DetailedProduct, Size, Tag } from "../../interfaces";
+import { DetailedProduct } from "../../interfaces";
 import { useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
 import useAdmin from "../../utils/hooks/useAdmin";
@@ -33,17 +30,142 @@ import { CheckBox } from "@mui/icons-material";
 interface Props {
   openStatus: boolean;
   product: DetailedProduct | undefined;
+  // product: any;
 }
 
 export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, product }) => {
   const dispatch = useAppDispatch();
-  // const { getDetailedProduct, detailedProduct, loadingProductDetails } = useAdmin();
+  const productTitle = createRef<HTMLInputElement>();
+  const productPrice = createRef<HTMLInputElement>();
+  const productDescription = createRef<HTMLInputElement>();
+  const productStock = createRef<HTMLInputElement>();
+  const [productBody, setProductBody] = useState({
+    title: "",
+    price: 0,
+    description: "",
+    stock: 0,
+    gender: "unisex",
+  });
+
+  const [genderState, setGenderState] = useState("unisex");
+  const [sizeState, setSizeState] = useState<{
+    XS: boolean;
+    S: boolean;
+    M: boolean;
+    L: boolean;
+    XL: boolean;
+    XXL: boolean;
+  }>({
+    XS: false,
+    S: false,
+    M: false,
+    L: false,
+    XL: false,
+    XXL: false,
+  });
+  const [tagState, setTagState] = useState({
+    shirts: false,
+    pants: false,
+    hoodies: false,
+    jackets: false,
+    hats: false,
+    sweatshirts: false,
+  });
+
+  const [imageState, setImageState] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (product) {
+      setProductBody({
+        title: product.title,
+        price: product.price,
+        description: product.description,
+        stock: product.stock,
+        gender: product.gender,
+      });
+      setGenderState(product.gender);
+      product.images.forEach((image) => {
+        setImageState((prevState) => [...prevState, image.url]);
+      });
+      product.sizes.forEach((size) => {
+        setSizeState({
+          ...sizeState,
+          [size]: true,
+        });
+      });
+      product.tags.forEach((tag) => {
+        setTagState({
+          ...tagState,
+          [tag]: true,
+        });
+      });
+    }
+  }, [product]);
+
   const handleClose = () => {
+    setProductBody({
+      title: "",
+      price: 0,
+      description: "",
+      stock: 0,
+      gender: "unisex",
+    });
+    setSizeState({
+      XS: false,
+      S: false,
+      M: false,
+      L: false,
+      XL: false,
+      XXL: false,
+    });
+    setTagState({
+      shirts: false,
+      pants: false,
+      hoodies: false,
+      jackets: false,
+      hats: false,
+      sweatshirts: false,
+    });
+    setImageState([]);
     dispatch(changeOpenEditDialogStatus());
   };
-  const handleGenderChange = () => {};
-  const handleSizeChange = () => {};
-  const handleTagChange = () => {};
+  const handleProductBodyChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setProductBody({
+      ...productBody,
+      [event.target.name]:
+        event.target.name === "price" || event.target.name === "stock"
+          ? Number(event.target.value)
+          : event.target.value,
+    });
+  };
+  const handleSizeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSizeState({
+      ...sizeState,
+      [event.target.name]: event.target.checked,
+    });
+  };
+  const handleTagChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setTagState({
+      ...tagState,
+      [event.target.name]: event.target.checked,
+    });
+  };
+
+  const handleSave = () => {
+    const sizes = Object.keys(sizeState).filter(
+      (checked) => sizeState[checked as keyof typeof sizeState]
+    );
+    const tags = Object.keys(tagState).filter(
+      (checked) => tagState[checked as keyof typeof tagState]
+    );
+    const finalObj = {
+      ...productBody,
+      sizes,
+      tags,
+      images: imageState,
+    };
+    console.log(finalObj);
+  };
 
   return (
     <Dialog open={openStatus} onClose={handleClose} fullWidth={true} maxWidth={"xl"}>
@@ -53,35 +175,36 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
           <FormGroup row sx={{ alignItems: "center", margin: "1rem 0" }}>
             <TextField
               id="outlined-title"
+              name={"title"}
               label="Title"
               sx={{ flexGrow: "1" }}
-              helperText={product ? product.title : "Product Title"}
+              onChange={handleProductBodyChange}
+              value={productBody.title}
             />
             <ImageList sx={{ width: 250, marginLeft: "1rem" }}>
-              {product ? (
-                product.images.map((item, index) => (
-                  <ImageListItem key={index}>
-                    <img src={item.url} alt={`${product.title} ${index}`} loading="lazy" />
-                    <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
-                      <IconButton color="primary" aria-label="view photo" component="label">
-                        <Visibility />
-                      </IconButton>
-                      <IconButton color="primary" aria-label="view photo" component="label">
-                        <Delete />
-                      </IconButton>
-                    </Stack>
-                  </ImageListItem>
-                ))
-              ) : (
-                <></>
-              )}
+              {imageState.map((item, index) => (
+                <ImageListItem key={index}>
+                  <img src={item} alt={`${productBody.title} ${index}`} loading="lazy" />
+                  <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
+                    <IconButton color="primary" aria-label="view photo" component="label">
+                      <Visibility />
+                    </IconButton>
+                    <IconButton color="primary" aria-label="view photo" component="label">
+                      <Delete />
+                    </IconButton>
+                  </Stack>
+                </ImageListItem>
+              ))}
             </ImageList>
           </FormGroup>
           <FormGroup>
             <TextField
               id="outlined-description"
               label="Description"
-              helperText={product ? product.description : "Product Description"}
+              name={"description"}
+              multiline
+              onChange={handleProductBodyChange}
+              value={productBody.description}
             />
           </FormGroup>
           <FormGroup
@@ -95,16 +218,20 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
           >
             <TextField
               id="outlined-price"
+              name={"price"}
               label="Price"
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
               }}
-              helperText={product ? `Current price: $${product.price}` : "Product Price"}
+              onChange={handleProductBodyChange}
+              value={productBody.price}
             />
             <TextField
               id="outlined-stock"
+              name={"stock"}
               label="Stock"
-              helperText={product ? `Current stock: ${product.stock}` : "Product Stock"}
+              onChange={handleProductBodyChange}
+              value={productBody.stock}
             />
             {product && (
               <Typography variant="overline" display="block" gutterBottom>
@@ -125,9 +252,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
               <FormLabel id={"genders"}>Gender</FormLabel>
               <RadioGroup
                 row
-                name="genders-group"
-                defaultValue={product ? product.gender : "unisex"}
-                onChange={handleGenderChange}
+                name="gender"
+                value={productBody.gender}
+                onChange={handleProductBodyChange}
               >
                 <FormControlLabel value={"kid"} control={<Radio />} label={"Kid"} />
                 <FormControlLabel value={"men"} control={<Radio />} label={"Men"} />
@@ -140,61 +267,37 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
               <FormGroup row>
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      checked={product ? product.sizes.includes(Size.L) : false}
-                      onChange={handleSizeChange}
-                      name={"L"}
-                    />
+                    <Checkbox checked={sizeState.L} onChange={handleSizeChange} name={"L"} />
                   }
                   label={"L"}
                 />
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      checked={product ? product.sizes.includes(Size.M) : false}
-                      onChange={handleSizeChange}
-                      name={"M"}
-                    />
+                    <Checkbox checked={sizeState.M} onChange={handleSizeChange} name={"M"} />
                   }
                   label={"M"}
                 />
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      checked={product ? product.sizes.includes(Size.S) : false}
-                      onChange={handleSizeChange}
-                      name={"S"}
-                    />
+                    <Checkbox checked={sizeState.S} onChange={handleSizeChange} name={"S"} />
                   }
                   label={"S"}
                 />
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      checked={product ? product.sizes.includes(Size.Xl) : false}
-                      onChange={handleSizeChange}
-                      name={"XL"}
-                    />
+                    <Checkbox checked={sizeState.XL} onChange={handleSizeChange} name={"XL"} />
                   }
                   label={"XL"}
                 />
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      checked={product ? product.sizes.includes(Size.Xs) : false}
-                      onChange={handleSizeChange}
-                      name={"XS"}
-                    />
+                    <Checkbox checked={sizeState.XS} onChange={handleSizeChange} name={"XS"} />
                   }
                   label={"XS"}
                 />
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      checked={product ? product.sizes.includes(Size.Xxl) : false}
-                      onChange={handleSizeChange}
-                      name={"XXL"}
-                    />
+                    <Checkbox checked={sizeState.XXL} onChange={handleSizeChange} name={"XXL"} />
                   }
                   label={"XXL"}
                 />
@@ -205,20 +308,16 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
               <FormGroup row>
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      checked={product ? product.tags.includes(Tag.Hats) : false}
-                      onChange={handleTagChange}
-                      name={"Hats"}
-                    />
+                    <Checkbox checked={tagState.hats} onChange={handleTagChange} name={"hats"} />
                   }
                   label={"Hats"}
                 />
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={product ? product.tags.includes(Tag.Hoodie) : false}
+                      checked={tagState.hoodies}
                       onChange={handleTagChange}
-                      name={"Hoodie"}
+                      name={"hoodies"}
                     />
                   }
                   label={"Hoodie"}
@@ -226,9 +325,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={product ? product.tags.includes(Tag.Jacket) : false}
+                      checked={tagState.jackets}
                       onChange={handleTagChange}
-                      name={"Jacket"}
+                      name={"jackets"}
                     />
                   }
                   label={"Jacket"}
@@ -236,9 +335,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={product ? product.tags.includes(Tag.Shirt) : false}
+                      checked={tagState.shirts}
                       onChange={handleTagChange}
-                      name={"Shirt"}
+                      name={"shirts"}
                     />
                   }
                   label={"Shirt"}
@@ -246,9 +345,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={product ? product.tags.includes(Tag.Sweatshirt) : false}
+                      checked={tagState.sweatshirts}
                       onChange={handleTagChange}
-                      name={"Sweatshirt"}
+                      name={"sweatshirts"}
                     />
                   }
                   label={"Sweatshirt"}
@@ -257,8 +356,10 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
             </FormControl>
           </Box>
           <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
-            <Button variant="outlined">Cancel</Button>
-            <Button variant="contained" disableElevation>
+            <Button variant="outlined" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button variant="contained" disableElevation onClick={handleSave}>
               Save
             </Button>
           </Stack>
