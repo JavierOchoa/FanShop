@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import {
   alpha,
   Box,
+  Button,
   Checkbox,
   FormControlLabel,
   IconButton,
@@ -23,7 +24,7 @@ import {
 import { AdminLayout } from "../../layouts";
 import { ProductAdminReponse, DetailedProduct } from "../../interfaces";
 import { visuallyHidden } from "@mui/utils";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Add, Delete } from "@mui/icons-material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { useGetProductsMutation, useGetProductDetailsMutation } from "./../../redux/services";
 import { EditProductDialog } from "../../components/admin";
@@ -98,14 +99,19 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           {tableToolbarTitle}
         </Typography>
       )}
-      {numSelected > 0 && (
+      {numSelected > 0 ? (
         <Tooltip title="Delete">
           <IconButton>
-            <DeleteIcon />
+            <Delete />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip title="New Product" color={"primary"}>
+          <IconButton>
+            <Add />
           </IconButton>
         </Tooltip>
       )}
-      {/* TODO: New Product */}
     </Toolbar>
   );
 }

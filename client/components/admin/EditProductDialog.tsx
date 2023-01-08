@@ -14,7 +14,6 @@ import {
   ImageList,
   ImageListItem,
   InputAdornment,
-  InputLabel,
   Radio,
   RadioGroup,
   Stack,
@@ -25,20 +24,15 @@ import { Visibility, Delete } from "@mui/icons-material";
 import { DetailedProduct } from "../../interfaces";
 import { useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
-import useAdmin from "../../utils/hooks/useAdmin";
-import { CheckBox } from "@mui/icons-material";
+import { NestedImageModal } from "../NestedImageModal";
+import sha1 from "sha1";
 interface Props {
   openStatus: boolean;
   product: DetailedProduct | undefined;
-  // product: any;
 }
 
 export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, product }) => {
   const dispatch = useAppDispatch();
-  const productTitle = createRef<HTMLInputElement>();
-  const productPrice = createRef<HTMLInputElement>();
-  const productDescription = createRef<HTMLInputElement>();
-  const productStock = createRef<HTMLInputElement>();
   const [productBody, setProductBody] = useState({
     title: "",
     price: 0,
@@ -47,7 +41,6 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
     gender: "unisex",
   });
 
-  const [genderState, setGenderState] = useState("unisex");
   const [sizeState, setSizeState] = useState<{
     XS: boolean;
     S: boolean;
@@ -83,7 +76,6 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
         stock: product.stock,
         gender: product.gender,
       });
-      setGenderState(product.gender);
       product.images.forEach((image) => {
         setImageState((prevState) => [...prevState, image.url]);
       });
@@ -151,6 +143,35 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
     });
   };
 
+  const handleDeleteImage = (toDelete: string) => {
+    const newImages = imageState.filter((image) => image !== toDelete);
+    setImageState(newImages);
+  };
+
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length > 1) return;
+    const file = event.target.files[0];
+    const timestamp = Date.now();
+    const apiSecret = process.env.NEXT_PUBLIC_CLOUDINARY_APISECRET || "default";
+    const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_APIKEY || "default";
+    const toSign = `timestamp=${timestamp}${apiSecret}`;
+    const signature = sha1(toSign);
+    const data = new FormData();
+    data.append("file", file);
+    data.append("api_key", apiKey);
+    data.append("timestamp", `${timestamp}`);
+    data.append("signature", signature);
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD}/image/upload`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+    const response = await res.json();
+    setImageState((prevState) => [...prevState, response.secure_url]);
+  };
+
   const handleSave = () => {
     const sizes = Object.keys(sizeState).filter(
       (checked) => sizeState[checked as keyof typeof sizeState]
@@ -181,20 +202,27 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
               onChange={handleProductBodyChange}
               value={productBody.title}
             />
-            <ImageList sx={{ width: 250, marginLeft: "1rem" }}>
+            <ImageList sx={{ width: 250, height: 160, marginLeft: "1rem" }}>
               {imageState.map((item, index) => (
-                <ImageListItem key={index}>
-                  <img src={item} alt={`${productBody.title} ${index}`} loading="lazy" />
-                  <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
-                    <IconButton color="primary" aria-label="view photo" component="label">
-                      <Visibility />
-                    </IconButton>
-                    <IconButton color="primary" aria-label="view photo" component="label">
-                      <Delete />
-                    </IconButton>
-                  </Stack>
-                </ImageListItem>
+                <Box key={index}>
+                  <NestedImageModal imageLink={item} altText={`${productBody.title} ${index}`} />
+                  <Button variant="text" onClick={() => handleDeleteImage(item)}>
+                    Delete
+                  </Button>
+                </Box>
               ))}
+              {imageState.length < 2 && (
+                <Button variant="contained" component="label">
+                  Upload
+                  <input
+                    hidden
+                    accept="image/*"
+                    multiple
+                    type="file"
+                    onChange={handleImageUpload}
+                  />
+                </Button>
+              )}
             </ImageList>
           </FormGroup>
           <FormGroup>
