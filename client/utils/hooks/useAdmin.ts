@@ -5,6 +5,7 @@ import {
   useGetProductsMutation,
   useGetProductDetailsMutation,
   useEditProductMutation,
+  useAddProductMutation,
 } from "../../redux/services";
 
 export default function useAdmin() {
@@ -12,6 +13,7 @@ export default function useAdmin() {
   const [getProducts, { data: productList, isLoading: loadingProducts }] = useGetProductsMutation();
   const [getProductInfo, { isLoading: loadingProductDetails }] = useGetProductDetailsMutation();
   const [editProduct, { isLoading: loadingProductEdit }] = useEditProductMutation();
+  const [addProduct, { isLoading: loadingProductCreation }] = useAddProductMutation();
   const [finalProduct, setFinalProduct] = useState<DetailedProduct | undefined>(undefined);
 
   useEffect(() => {
@@ -39,11 +41,21 @@ export default function useAdmin() {
     }
   };
 
+  const postAddProduct = async (productToAdd: ProductPost) => {
+    try {
+      const addProductResponse = await addProduct(productToAdd).unwrap();
+      return addProductResponse;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return {
     loadingProducts,
     productList,
     getDetailedProduct,
     postEditProduct,
+    postAddProduct,
     loadingProductDetails,
   };
 }

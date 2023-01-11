@@ -28,8 +28,19 @@ export const adminApi = createApi({
         body: productToEdit,
       }),
     }),
+    addProduct: builder.mutation<{ successful: boolean; message: string }, ProductPost>({
+      query: (productToAdd) => ({
+        url: "/admin/products/add",
+        method: "POST",
+        body: productToAdd,
+      }),
+    }),
   }),
 });
 
-export const { useGetProductsMutation, useGetProductDetailsMutation, useEditProductMutation } =
-  adminApi;
+export const {
+  useGetProductsMutation,
+  useGetProductDetailsMutation,
+  useEditProductMutation,
+  useAddProductMutation,
+} = adminApi;

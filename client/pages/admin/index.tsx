@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { AdminLayout } from "../../layouts";
-import { ProductAdminReponse, DetailedProduct } from "../../interfaces";
+import { ProductAdminReponse, DetailedProduct, ModalType } from "../../interfaces";
 import { visuallyHidden } from "@mui/utils";
 import { Add, Delete } from "@mui/icons-material";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -148,8 +148,6 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-type ModalType = "edit" | "new";
-
 export default function AdminPanel() {
   const dispatch = useAppDispatch();
   const { loadingProducts, productList, getDetailedProduct } = useAdmin();
@@ -160,11 +158,12 @@ export default function AdminPanel() {
   const [productToEdit, setProductToEdit] = React.useState<DetailedProduct | undefined>(undefined);
   const [modalType, setModalType] = React.useState<ModalType>("new");
 
-  const handleOpenEditDialog = async (productId?: string) => {
+  const handleOpenEditDialog = async (dialogType: ModalType, productId?: string) => {
     if (productId) {
       const detailedProduct = await getDetailedProduct(productId);
       setProductToEdit(detailedProduct);
     }
+    setModalType(dialogType);
     dispatch(changeOpenEditDialogStatus());
   };
 
@@ -215,7 +214,45 @@ export default function AdminPanel() {
     <AdminLayout title="Admin Panel" pageDescription="Admin panel for FanShop">
       <Box sx={{ width: "100%" }}>
         <Paper sx={{ width: "100%", mb: 2 }}>
-          <EnhancedTableToolbar tableToolbarTitle={"Product List"} numSelected={selected.length} />
+          {/* <EnhancedTableToolbar tableToolbarTitle={"Product List"} numSelected={selected.length} /> */}
+          <Toolbar
+            sx={{
+              pl: { sm: 2 },
+              pr: { xs: 1, sm: 1 },
+              ...(selected.length > 0 && {
+                bgcolor: (theme) =>
+                  alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+              }),
+            }}
+          >
+            {selected.length > 0 ? (
+              <Typography
+                sx={{ flex: "1 1 100%" }}
+                color="inherit"
+                variant="subtitle1"
+                component="div"
+              >
+                {selected.length} selected
+              </Typography>
+            ) : (
+              <Typography sx={{ flex: "1 1 100%" }} variant="h6" id="tableTitle" component="div">
+                Product List
+              </Typography>
+            )}
+            {selected.length > 0 ? (
+              <Tooltip title="Delete">
+                <IconButton>
+                  <Delete />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Tooltip title="New Product" color={"primary"}>
+                <IconButton onClick={() => handleOpenEditDialog("new")}>
+                  <Add />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Toolbar>
           <TableContainer>
             <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={"small"}>
               <EnhancedTableHead
@@ -256,7 +293,7 @@ export default function AdminPanel() {
                               id={labelId}
                               scope="product"
                               padding="none"
-                              onClick={async () => await handleOpenEditDialog(product.id)}
+                              onClick={async () => await handleOpenEditDialog("edit", product.id)}
                             >
                               {product.title}
                             </TableCell>
@@ -302,7 +339,11 @@ export default function AdminPanel() {
           )}
         </Paper>
       </Box>
-      <EditProductDialog openStatus={openEditDialog} product={productToEdit} />
+      <EditProductDialog
+        openStatus={openEditDialog}
+        product={productToEdit}
+        dialogType={modalType}
+      />
     </AdminLayout>
   );
 }

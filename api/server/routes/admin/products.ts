@@ -1,6 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
 import { productImageRepository, productRepository } from "../../../appDataSource";
+import { User } from "../../../appDataSource/entity";
 
 export const productsAdminRouter = Router();
 
@@ -91,6 +92,45 @@ productsAdminRouter.post(
       res.send({
         successful: true,
         message: `Product ${id} has been updated successfully`,
+      });
+    } catch (err) {
+      res.send({
+        successful: false,
+        message: (err as Error).message,
+      });
+      return;
+    }
+  }
+);
+
+productsAdminRouter.post(
+  "/add",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const user = req.user as User;
+    const { title, price, description, stock, gender, sizes, tags, images } = req.body;
+
+    try {
+      const newImages = images.map((image: { id: number; url: string }) =>
+        productImageRepository.create({
+          url: image.url,
+        })
+      );
+      const newProduct = productRepository.create({
+        title,
+        price,
+        description,
+        stock,
+        gender,
+        sizes,
+        tags,
+        images: newImages,
+        user,
+      });
+      await productRepository.save(newProduct);
+      res.send({
+        successful: true,
+        message: `Product has been created`,
       });
     } catch (err) {
       res.send({

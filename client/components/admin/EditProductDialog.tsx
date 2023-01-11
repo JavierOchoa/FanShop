@@ -21,7 +21,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, Delete } from "@mui/icons-material";
-import { DetailedProduct, Image } from "../../interfaces";
+import { DetailedProduct, Image, ModalType } from "../../interfaces";
 import { useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
 import { NestedImageModal } from "../NestedImageModal";
@@ -31,6 +31,7 @@ import useAdmin from "../../utils/hooks/useAdmin";
 interface Props {
   openStatus: boolean;
   product: DetailedProduct | undefined;
+  dialogType: ModalType;
 }
 
 interface ProductBody {
@@ -60,9 +61,13 @@ interface TagState {
   sweatshirts: boolean;
 }
 
-export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, product }) => {
+export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
+  openStatus,
+  product,
+  dialogType,
+}) => {
   const dispatch = useAppDispatch();
-  const { postEditProduct } = useAdmin();
+  const { postEditProduct, postAddProduct } = useAdmin();
   const [productBody, setProductBody] = useState<ProductBody>({
     id: undefined,
     title: "",
@@ -120,6 +125,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
   }, [product]);
 
   const handleClose = () => {
+    dispatch(changeOpenEditDialogStatus());
     setProductBody({
       title: "",
       price: 0,
@@ -144,7 +150,6 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
       sweatshirts: false,
     });
     setImageState([]);
-    dispatch(changeOpenEditDialogStatus());
   };
   const handleProductBodyChange = (event: ChangeEvent<HTMLInputElement>) => {
     setProductBody({
@@ -214,7 +219,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
       tags,
       images: imageState,
     };
-    await postEditProduct(finalObj);
+    dialogType === "edit" ? await postEditProduct(finalObj) : await postAddProduct(finalObj);
     dispatch(changeOpenEditDialogStatus());
     return;
   };
