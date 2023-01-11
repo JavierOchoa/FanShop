@@ -21,19 +21,50 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, Delete } from "@mui/icons-material";
-import { DetailedProduct } from "../../interfaces";
+import { DetailedProduct, Image } from "../../interfaces";
 import { useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
 import { NestedImageModal } from "../NestedImageModal";
 import sha1 from "sha1";
+import useAdmin from "../../utils/hooks/useAdmin";
+
 interface Props {
   openStatus: boolean;
   product: DetailedProduct | undefined;
 }
 
+interface ProductBody {
+  id?: string;
+  title: string;
+  price: number;
+  description: string;
+  stock: number;
+  gender: string;
+}
+
+interface SizeState {
+  XS: boolean;
+  S: boolean;
+  M: boolean;
+  L: boolean;
+  XL: boolean;
+  XXL: boolean;
+}
+
+interface TagState {
+  shirts: boolean;
+  pants: boolean;
+  hoodies: boolean;
+  jackets: boolean;
+  hats: boolean;
+  sweatshirts: boolean;
+}
+
 export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, product }) => {
   const dispatch = useAppDispatch();
-  const [productBody, setProductBody] = useState({
+  const { postEditProduct } = useAdmin();
+  const [productBody, setProductBody] = useState<ProductBody>({
+    id: undefined,
     title: "",
     price: 0,
     description: "",
@@ -41,14 +72,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
     gender: "unisex",
   });
 
-  const [sizeState, setSizeState] = useState<{
-    XS: boolean;
-    S: boolean;
-    M: boolean;
-    L: boolean;
-    XL: boolean;
-    XXL: boolean;
-  }>({
+  const [sizeState, setSizeState] = useState<SizeState>({
     XS: false,
     S: false,
     M: false,
@@ -56,7 +80,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
     XL: false,
     XXL: false,
   });
-  const [tagState, setTagState] = useState({
+  const [tagState, setTagState] = useState<TagState>({
     shirts: false,
     pants: false,
     hoodies: false,
@@ -65,19 +89,20 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
     sweatshirts: false,
   });
 
-  const [imageState, setImageState] = useState<string[]>([]);
+  const [imageState, setImageState] = useState<{ id: number; url: string }[]>([]);
 
   useEffect(() => {
     if (product) {
       setProductBody({
+        id: product.id,
         title: product.title,
         price: product.price,
         description: product.description,
         stock: product.stock,
         gender: product.gender,
       });
-      product.images.forEach((image) => {
-        setImageState((prevState) => [...prevState, image.url]);
+      product.images.forEach((image, index) => {
+        setImageState((prevState) => [...prevState, { id: index, url: image.url }]);
       });
       product.sizes.forEach((size) => {
         setSizeState({
@@ -144,7 +169,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
   };
 
   const handleDeleteImage = (toDelete: string) => {
-    const newImages = imageState.filter((image) => image !== toDelete);
+    const newImages = imageState.filter((image) => image.url !== toDelete);
     setImageState(newImages);
   };
 
@@ -169,10 +194,14 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
       }
     );
     const response = await res.json();
-    setImageState((prevState) => [...prevState, response.secure_url]);
+    const currentId = imageState.map((image) => image.id);
+    setImageState((prevState) => [
+      ...prevState,
+      { id: currentId[0] === 0 ? 1 : 0, url: response.secure_url },
+    ]);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const sizes = Object.keys(sizeState).filter(
       (checked) => sizeState[checked as keyof typeof sizeState]
     );
@@ -185,7 +214,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
       tags,
       images: imageState,
     };
-    console.log(finalObj);
+    await postEditProduct(finalObj);
+    dispatch(changeOpenEditDialogStatus());
+    return;
   };
 
   return (
@@ -205,8 +236,11 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({ openStatus, pr
             <ImageList sx={{ width: 250, height: 160, marginLeft: "1rem" }}>
               {imageState.map((item, index) => (
                 <Box key={index}>
-                  <NestedImageModal imageLink={item} altText={`${productBody.title} ${index}`} />
-                  <Button variant="text" onClick={() => handleDeleteImage(item)}>
+                  <NestedImageModal
+                    imageLink={item.url}
+                    altText={`${productBody.title} ${index}`}
+                  />
+                  <Button variant="text" onClick={() => handleDeleteImage(item.url)}>
                     Delete
                   </Button>
                 </Box>

@@ -78,6 +78,7 @@ interface EnhancedTableToolbarProps {
 }
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
+  const dispatch = useAppDispatch();
   const { tableToolbarTitle, numSelected } = props;
   return (
     <Toolbar
@@ -107,7 +108,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         </Tooltip>
       ) : (
         <Tooltip title="New Product" color={"primary"}>
-          <IconButton>
+          <IconButton onClick={() => dispatch(changeOpenEditDialogStatus())}>
             <Add />
           </IconButton>
         </Tooltip>
@@ -147,6 +148,8 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
+type ModalType = "edit" | "new";
+
 export default function AdminPanel() {
   const dispatch = useAppDispatch();
   const { loadingProducts, productList, getDetailedProduct } = useAdmin();
@@ -155,10 +158,13 @@ export default function AdminPanel() {
   const [rowsPerPage, setRowsPerPage] = React.useState<number>(15);
   const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
   const [productToEdit, setProductToEdit] = React.useState<DetailedProduct | undefined>(undefined);
+  const [modalType, setModalType] = React.useState<ModalType>("new");
 
-  const handleOpenEditDialog = async (productId: string) => {
-    const detailedProduct = await getDetailedProduct(productId);
-    setProductToEdit(detailedProduct);
+  const handleOpenEditDialog = async (productId?: string) => {
+    if (productId) {
+      const detailedProduct = await getDetailedProduct(productId);
+      setProductToEdit(detailedProduct);
+    }
     dispatch(changeOpenEditDialogStatus());
   };
 

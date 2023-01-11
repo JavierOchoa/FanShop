@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
 import { useAppSelector } from ".";
-import { DetailedProduct } from "../../interfaces";
-import { useGetProductsMutation, useGetProductDetailsMutation } from "../../redux/services";
+import { DetailedProduct, ProductPost } from "../../interfaces";
+import {
+  useGetProductsMutation,
+  useGetProductDetailsMutation,
+  useEditProductMutation,
+} from "../../redux/services";
 
 export default function useAdmin() {
   const token = useAppSelector((state) => state.auth.token);
   const [getProducts, { data: productList, isLoading: loadingProducts }] = useGetProductsMutation();
   const [getProductInfo, { isLoading: loadingProductDetails }] = useGetProductDetailsMutation();
+  const [editProduct, { isLoading: loadingProductEdit }] = useEditProductMutation();
   const [finalProduct, setFinalProduct] = useState<DetailedProduct | undefined>(undefined);
 
   useEffect(() => {
@@ -25,10 +30,20 @@ export default function useAdmin() {
     }
   };
 
+  const postEditProduct = async (productToEdit: ProductPost) => {
+    try {
+      const editProductResponse = await editProduct(productToEdit).unwrap();
+      return editProductResponse;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return {
     loadingProducts,
     productList,
     getDetailedProduct,
+    postEditProduct,
     loadingProductDetails,
   };
 }
