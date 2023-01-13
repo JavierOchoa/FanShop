@@ -1,12 +1,20 @@
 import { Router } from "express";
 import passport from "passport";
 import { productImageRepository, productRepository } from "../../../appDataSource";
-import { User } from "../../../appDataSource/entity";
+import { Product, User } from "../../../appDataSource/entity";
 
 export const productsAdminRouter = Router();
 
 productsAdminRouter.get("/", passport.authenticate("jwt", { session: false }), async (req, res) => {
   try {
+    const user = req.user as User;
+    if (!user.roles.includes("admin")) {
+      res.send({
+        successful: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
     const productsOnDb = await productRepository.find({
       select: {
         id: true,
@@ -18,7 +26,12 @@ productsAdminRouter.get("/", passport.authenticate("jwt", { session: false }), a
         user: true,
       },
     });
-    res.send(productsOnDb);
+    const sortedProducts = productsOnDb.sort((a, b) => {
+      var textA = a.title.toUpperCase();
+      var textB = b.title.toUpperCase();
+      return textA < textB ? -1 : textA > textB ? 1 : 0;
+    });
+    res.send(sortedProducts);
   } catch (err) {
     console.log(err);
   }
@@ -138,6 +151,48 @@ productsAdminRouter.post(
         message: (err as Error).message,
       });
       return;
+    }
+  }
+);
+
+productsAdminRouter.delete(
+  "/delete/:id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const user = req.user as User;
+    const { id } = req.params;
+    if (!user.roles.includes("admin")) {
+      res.send({
+        successful: false,
+        message: "Unauthorized",
+      });
+    }
+    try {
+      const productOnDb = await productRepository.findOne({ where: { id } });
+      if (!productOnDb) {
+        res.send({
+          successful: false,
+          message: `No product with ID: ${id}`,
+        });
+        return;
+      }
+      await productRepository
+        .createQueryBuilder("product")
+        .delete()
+        .from(Product)
+        .where("id = :id", { id })
+        .execute();
+
+      res.send({
+        successful: true,
+        message: `Product with ID: ${id} has been deleted`,
+      });
+    } catch (err) {
+      console.log(err);
+      res.send({
+        successful: true,
+        message: (err as Error).message,
+      });
     }
   }
 );

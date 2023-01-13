@@ -1,12 +1,16 @@
 import React, { useEffect } from "react";
 import {
   alpha,
+  Autocomplete,
   Box,
   Button,
   Checkbox,
   FormControlLabel,
   IconButton,
+  MenuItem,
   Paper,
+  Select,
+  SelectChangeEvent,
   Skeleton,
   Switch,
   Table,
@@ -17,6 +21,7 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
+  TextField,
   Toolbar,
   Tooltip,
   Typography,
@@ -26,8 +31,8 @@ import { ProductAdminReponse, DetailedProduct, ModalType } from "../../interface
 import { visuallyHidden } from "@mui/utils";
 import { Add, Delete } from "@mui/icons-material";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { useGetProductsMutation, useGetProductDetailsMutation } from "./../../redux/services";
-import { EditProductDialog } from "../../components/admin";
+import { useGetProductsQuery, useGetProductDetailsMutation } from "./../../redux/services";
+import { ConfirmDeleteDialog, EditProductDialog } from "../../components/admin";
 import { useAppSelector, useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
 import useAdmin from "../../utils/hooks/useAdmin";
@@ -150,13 +155,18 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function AdminPanel() {
   const dispatch = useAppDispatch();
-  const { loadingProducts, productList, getDetailedProduct } = useAdmin();
-  const [selected, setSelected] = React.useState<readonly string[]>([]);
+  const { getDetailedProduct } = useAdmin();
+  const { data: productList, isLoading: loadingProductList } = useGetProductsQuery();
+  const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState<number>(15);
   const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
   const [productToEdit, setProductToEdit] = React.useState<DetailedProduct | undefined>(undefined);
   const [modalType, setModalType] = React.useState<ModalType>("new");
+
+  useEffect(() => {
+    setSelected([]);
+  }, [productList]);
 
   const handleOpenEditDialog = async (dialogType: ModalType, productId?: string) => {
     if (productId) {
@@ -169,19 +179,19 @@ export default function AdminPanel() {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = productList!.map((n) => n.title);
+      const newSelected = productList!.map((n) => n.id);
       setSelected(newSelected);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event: React.ChangeEvent<HTMLInputElement>, name: string) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected: readonly string[] = [];
+  const handleClick = (event: React.ChangeEvent<HTMLInputElement>, id: string) => {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -192,7 +202,6 @@ export default function AdminPanel() {
         selected.slice(selectedIndex + 1)
       );
     }
-
     setSelected(newSelected);
   };
 
@@ -205,7 +214,7 @@ export default function AdminPanel() {
     setPage(0);
   };
 
-  const isSelected = (name: string) => selected.indexOf(name) !== -1;
+  const isSelected = (id: string) => selected.indexOf(id) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty productList.
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - productList!.length) : 0;
@@ -240,17 +249,24 @@ export default function AdminPanel() {
               </Typography>
             )}
             {selected.length > 0 ? (
-              <Tooltip title="Delete">
-                <IconButton>
-                  <Delete />
-                </IconButton>
-              </Tooltip>
+              // <Tooltip title="Delete">
+              //   <IconButton onClick={handleDeleteSelected}>
+              //     <Delete />
+              //   </IconButton>
+              // </Tooltip>
+              <ConfirmDeleteDialog variant={"tooltip"} productsToDelete={selected} />
             ) : (
-              <Tooltip title="New Product" color={"primary"}>
-                <IconButton onClick={() => handleOpenEditDialog("new")}>
-                  <Add />
-                </IconButton>
-              </Tooltip>
+              <Box>
+                {/* <Select value={sortType} label="Sort" onChange={handleProductListSort}>
+                  <MenuItem value={"ASC"}>"Ascending"</MenuItem>
+                  <MenuItem value={"DESC"}>Descending</MenuItem>
+                </Select> */}
+                <Tooltip title="New Product" color={"primary"}>
+                  <IconButton onClick={() => handleOpenEditDialog("new")}>
+                    <Add />
+                  </IconButton>
+                </Tooltip>
+              </Box>
             )}
           </Toolbar>
           <TableContainer>
@@ -265,7 +281,7 @@ export default function AdminPanel() {
                   ? productList
                       .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                       .map((product, index) => {
-                        const isItemSelected = isSelected(product.title);
+                        const isItemSelected = isSelected(product.id);
                         const labelId = `enhanced-table-checkbox-${index}`;
 
                         return (
@@ -282,7 +298,7 @@ export default function AdminPanel() {
                               <Checkbox
                                 color="primary"
                                 checked={isItemSelected}
-                                onChange={(event) => handleClick(event, product.title)}
+                                onChange={(event) => handleClick(event, product.id)}
                                 inputProps={{
                                   "aria-labelledby": labelId,
                                 }}

@@ -1,5 +1,6 @@
 import { ChangeEvent, createRef, FC, PropsWithChildren, useEffect, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -21,12 +22,13 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, Delete } from "@mui/icons-material";
-import { DetailedProduct, Image, ModalType } from "../../interfaces";
+import { DetailedProduct, Image, ModalType, ProductPostResponse } from "../../interfaces";
 import { useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
 import { NestedImageModal } from "../NestedImageModal";
 import sha1 from "sha1";
 import useAdmin from "../../utils/hooks/useAdmin";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 
 interface Props {
   openStatus: boolean;
@@ -67,7 +69,8 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
   dialogType,
 }) => {
   const dispatch = useAppDispatch();
-  const { postEditProduct, postAddProduct } = useAdmin();
+  const { handleProductSave, deleteProduct } = useAdmin();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [productBody, setProductBody] = useState<ProductBody>({
     id: undefined,
     title: "",
@@ -206,7 +209,23 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
     ]);
   };
 
+  const handleDeleteProduct = async () => {
+    const productId = productBody.id!;
+    try {
+      const response = await deleteProduct(productId);
+      if (response?.successful === false) {
+        setErrorMessage(response.message);
+        return;
+      }
+      dispatch(changeOpenEditDialogStatus());
+      return response;
+    } catch (err) {
+      setErrorMessage((err as Error).message);
+    }
+  };
+
   const handleSave = async () => {
+    setErrorMessage(undefined);
     const sizes = Object.keys(sizeState).filter(
       (checked) => sizeState[checked as keyof typeof sizeState]
     );
@@ -219,9 +238,21 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
       tags,
       images: imageState,
     };
-    dialogType === "edit" ? await postEditProduct(finalObj) : await postAddProduct(finalObj);
-    dispatch(changeOpenEditDialogStatus());
-    return;
+    try {
+      const saveResponse: ProductPostResponse | undefined = await handleProductSave(
+        finalObj,
+        dialogType
+      );
+      if (saveResponse?.successful === false) {
+        setErrorMessage(saveResponse?.message);
+        return;
+      }
+      dispatch(changeOpenEditDialogStatus());
+      return saveResponse;
+    } catch (err) {
+      setErrorMessage((err as Error).message);
+      return;
+    }
   };
 
   return (
@@ -422,7 +453,19 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               </FormGroup>
             </FormControl>
           </Box>
-          <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
+          <Stack
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+            spacing={2}
+            sx={{ m: 2 }}
+          >
+            {dialogType === "edit" && (
+              // <Button variant="contained" color="error" onClick={handleDeleteProduct}>
+              //   Delete
+              // </Button>
+              <ConfirmDeleteDialog variant="button" productsToDelete={[product!.id!]} />
+            )}
             <Button variant="outlined" onClick={handleClose}>
               Cancel
             </Button>
@@ -430,6 +473,11 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               Save
             </Button>
           </Stack>
+          {errorMessage && (
+            <Alert variant="filled" severity="error">
+              {errorMessage}
+            </Alert>
+          )}
         </Box>
       </DialogContent>
     </Dialog>

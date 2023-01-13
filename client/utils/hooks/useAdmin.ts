@@ -1,26 +1,28 @@
 import { useState, useEffect } from "react";
 import { useAppSelector } from ".";
-import { DetailedProduct, ProductPost } from "../../interfaces";
+import { DetailedProduct, ModalType, ProductPost, ProductPostResponse } from "../../interfaces";
 import {
-  useGetProductsMutation,
   useGetProductDetailsMutation,
   useEditProductMutation,
   useAddProductMutation,
+  useRemoveProductMutation,
 } from "../../redux/services";
 
 export default function useAdmin() {
   const token = useAppSelector((state) => state.auth.token);
-  const [getProducts, { data: productList, isLoading: loadingProducts }] = useGetProductsMutation();
+  // const [getProducts, { data: productList, isLoading: loadingProducts }] = useGetProductsMutation();
   const [getProductInfo, { isLoading: loadingProductDetails }] = useGetProductDetailsMutation();
   const [editProduct, { isLoading: loadingProductEdit }] = useEditProductMutation();
   const [addProduct, { isLoading: loadingProductCreation }] = useAddProductMutation();
+  const [removeProduct, { isLoading: loadingProductRemoval }] = useRemoveProductMutation();
+  // const { data, isLoading: loLo } = useTestEndpointQuery();
   const [finalProduct, setFinalProduct] = useState<DetailedProduct | undefined>(undefined);
 
-  useEffect(() => {
-    if (token !== null) {
-      getProducts();
-    }
-  }, [token]);
+  // useEffect(() => {
+  //   if (token !== null) {
+  //     getProducts();
+  //   }
+  // }, [token]);
 
   const getDetailedProduct = async (productId: string) => {
     try {
@@ -50,12 +52,43 @@ export default function useAdmin() {
     }
   };
 
+  const handleProductSave = async (product: ProductPost, typeEdit: ModalType) => {
+    let response: ProductPostResponse | undefined;
+    try {
+      typeEdit === "edit"
+        ? (response = await postEditProduct(product))
+        : (response = await postAddProduct(product));
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const deleteProduct = async (productId: string) => {
+    try {
+      const response = await removeProduct(productId).unwrap();
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const deleteProducts = async (productsToDelete: string[]) => {
+    try {
+      const toResolve = productsToDelete.map((product) => removeProduct(product).unwrap());
+      await Promise.all(toResolve);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return {
-    loadingProducts,
-    productList,
     getDetailedProduct,
     postEditProduct,
     postAddProduct,
+    handleProductSave,
+    deleteProduct,
     loadingProductDetails,
+    deleteProducts,
   };
 }
