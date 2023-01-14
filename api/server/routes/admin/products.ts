@@ -9,7 +9,7 @@ productsAdminRouter.get("/", passport.authenticate("jwt", { session: false }), a
   try {
     const user = req.user as User;
     if (!user.roles.includes("admin")) {
-      res.send({
+      res.status(401).send({
         successful: false,
         message: "Unauthorized",
       });
@@ -42,6 +42,14 @@ productsAdminRouter.get(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const { productId } = req.params;
+    const user = req.user as User;
+    if (!user.roles.includes("admin")) {
+      res.status(401).send({
+        successful: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
     if (!productId) {
       return res.send({
         message: "No product id",
@@ -69,7 +77,14 @@ productsAdminRouter.post(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const { id, title, price, description, stock, gender, sizes, tags, images } = req.body;
-
+    const user = req.user as User;
+    if (!user.roles.includes("admin")) {
+      res.status(401).send({
+        successful: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
     if (!id) {
       res.send({
         successful: false,
@@ -77,7 +92,23 @@ productsAdminRouter.post(
       });
       return;
     }
-
+    if (
+      !/^[_A-z0-9]*((-|\s)*[_A-z0-9])*$/g.test(title) ||
+      !/[\S\s]+[\S]*$/g.test(title) ||
+      !/[\S\s]+[\S]*$/g.test(description) ||
+      isNaN(stock) ||
+      isNaN(price) ||
+      !["kid", "men", "women", "unisex"].includes(gender) ||
+      tags.length < 1 ||
+      sizes.length < 1
+    ) {
+      res.send({
+        successful: false,
+        message:
+          "Missing information or Wrong data. Please check all fields and select at least one size and tag",
+      });
+      return;
+    }
     try {
       const productOnDb = await productRepository.findOne({ where: { id } });
       if (!productOnDb) {
@@ -94,9 +125,9 @@ productsAdminRouter.post(
         })
       );
       productOnDb.title = title;
-      productOnDb.price = price;
+      productOnDb.price = Number(price);
       productOnDb.description = description;
-      productOnDb.stock = stock;
+      productOnDb.stock = Number(stock);
       productOnDb.gender = gender;
       productOnDb.sizes = sizes;
       productOnDb.tags = tags;
@@ -120,9 +151,15 @@ productsAdminRouter.post(
   "/add",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    const user = req.user as User;
     const { title, price, description, stock, gender, sizes, tags, images } = req.body;
-
+    const user = req.user as User;
+    if (!user.roles.includes("admin")) {
+      res.status(401).send({
+        successful: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
     try {
       const newImages = images.map((image: { id: number; url: string }) =>
         productImageRepository.create({
@@ -162,7 +199,7 @@ productsAdminRouter.delete(
     const user = req.user as User;
     const { id } = req.params;
     if (!user.roles.includes("admin")) {
-      res.send({
+      res.status(401).send({
         successful: false,
         message: "Unauthorized",
       });
