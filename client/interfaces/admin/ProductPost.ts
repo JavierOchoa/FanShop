@@ -7,8 +7,8 @@ export interface ProductPost {
   }[];
   id?: string | undefined;
   title: string;
-  price: number;
+  price: string;
   description: string;
-  stock: number;
+  stock: string;
   gender: string;
 }

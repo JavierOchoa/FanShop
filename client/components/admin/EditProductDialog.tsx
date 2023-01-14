@@ -11,9 +11,7 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
-  IconButton,
   ImageList,
-  ImageListItem,
   InputAdornment,
   Radio,
   RadioGroup,
@@ -21,8 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Visibility, Delete } from "@mui/icons-material";
-import { DetailedProduct, Image, ModalType, ProductPostResponse } from "../../interfaces";
+import { DetailedProduct, ModalType, ProductPostResponse } from "../../interfaces";
 import { useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
 import { NestedImageModal } from "../NestedImageModal";
@@ -39,9 +36,9 @@ interface Props {
 interface ProductBody {
   id?: string;
   title: string;
-  price: number;
+  price: string;
   description: string;
-  stock: number;
+  stock: string;
   gender: string;
 }
 
@@ -55,12 +52,25 @@ interface SizeState {
 }
 
 interface TagState {
-  shirts: boolean;
+  shirt: boolean;
   pants: boolean;
   hoodies: boolean;
   jackets: boolean;
   hats: boolean;
   sweatshirts: boolean;
+}
+
+interface errorState {
+  title: errorStatus;
+  price: errorStatus;
+  description: errorStatus;
+  stock: errorStatus;
+  gender: errorStatus;
+}
+
+interface errorStatus {
+  status: boolean;
+  message: string;
 }
 
 export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
@@ -70,13 +80,21 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { handleProductSave, deleteProduct } = useAdmin();
+  const [disabledSaveStatus, setDisabledSaveStatus] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<errorState>({
+    title: { status: false, message: "" },
+    price: { status: false, message: "" },
+    description: { status: false, message: "" },
+    stock: { status: false, message: "" },
+    gender: { status: false, message: "" },
+  });
   const [productBody, setProductBody] = useState<ProductBody>({
     id: undefined,
     title: "",
-    price: 0,
+    price: "0",
     description: "",
-    stock: 0,
+    stock: "0",
     gender: "unisex",
   });
 
@@ -89,7 +107,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
     XXL: false,
   });
   const [tagState, setTagState] = useState<TagState>({
-    shirts: false,
+    shirt: false,
     pants: false,
     hoodies: false,
     jackets: false,
@@ -101,12 +119,13 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
 
   useEffect(() => {
     if (product) {
+      setErrorMessage(undefined);
       setProductBody({
         id: product.id,
         title: product.title,
-        price: product.price,
+        price: String(product.price),
         description: product.description,
-        stock: product.stock,
+        stock: String(product.stock),
         gender: product.gender,
       });
       product.images.forEach((image, index) => {
@@ -125,15 +144,96 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
         });
       });
     }
+    setDisabledSaveStatus(true);
   }, [product]);
 
+  const validate = (
+    fieldToValidate: "title" | "price" | "description" | "stock" | "gender",
+    value: string
+  ) => {
+    if (fieldToValidate === "title") {
+      if (!/^[_A-z0-9]*((-|\s)*[_A-z0-9])*$/g.test(value) || !/[\S\s]+[\S]*$/g.test(value)) {
+        setError({
+          ...error,
+          [fieldToValidate]: {
+            status: true,
+            message: "This field is requiered. Can't contain special characters",
+          },
+        });
+        setDisabledSaveStatus(true);
+      } else {
+        setError({
+          ...error,
+          [fieldToValidate]: {
+            status: false,
+            message: "",
+          },
+        });
+        setDisabledSaveStatus(false);
+      }
+    }
+    if (fieldToValidate === "description") {
+      if (!/[\S\s]+[\S]*$/g.test(value)) {
+        setError({
+          ...error,
+          [fieldToValidate]: { status: true, message: "This field is requiered." },
+        });
+        setDisabledSaveStatus(true);
+      } else {
+        setError({
+          ...error,
+          [fieldToValidate]: {
+            status: false,
+            message: "",
+          },
+        });
+        setDisabledSaveStatus(false);
+      }
+    }
+    if (fieldToValidate === "stock" || fieldToValidate === "price") {
+      if (!/^[0-9]*$/g.test(value)) {
+        setError({
+          ...error,
+          [fieldToValidate]: { status: true, message: "This field must be a number." },
+        });
+        setDisabledSaveStatus(true);
+      } else {
+        setError({
+          ...error,
+          [fieldToValidate]: {
+            status: false,
+            message: "",
+          },
+        });
+        setDisabledSaveStatus(false);
+      }
+    }
+    if (fieldToValidate === "gender") {
+      if (!["kid", "men", "women", "unisex"].includes(value)) {
+        setError({
+          ...error,
+          [fieldToValidate]: { status: true, message: "Gender must be kid, men, women or unisex" },
+        });
+        setDisabledSaveStatus(true);
+      } else {
+        setError({
+          ...error,
+          [fieldToValidate]: {
+            status: false,
+            message: "",
+          },
+        });
+        setDisabledSaveStatus(false);
+      }
+    }
+  };
   const handleClose = () => {
     dispatch(changeOpenEditDialogStatus());
     setProductBody({
       title: "",
-      price: 0,
+      price: "0",
       description: "",
-      stock: 0,
+      stock: "0",
       gender: "unisex",
     });
     setSizeState({
@@ -145,7 +245,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
       XXL: false,
     });
     setTagState({
-      shirts: false,
+      shirt: false,
       pants: false,
       hoodies: false,
       jackets: false,
@@ -153,14 +253,25 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
       sweatshirts: false,
     });
     setImageState([]);
+    setError({
+      title: { status: false, message: "" },
+      price: { status: false, message: "" },
+      description: { status: false, message: "" },
+      stock: { status: false, message: "" },
+      gender: { status: false, message: "" },
+    });
+  };
+  const checkValidations = () => {
+    return Object.keys(error).filter((err) => error[err as keyof typeof error]).length;
   };
   const handleProductBodyChange = (event: ChangeEvent<HTMLInputElement>) => {
+    validate(
+      event.target.name as "title" | "price" | "description" | "stock" | "gender",
+      event.target.value
+    );
     setProductBody({
       ...productBody,
-      [event.target.name]:
-        event.target.name === "price" || event.target.name === "stock"
-          ? Number(event.target.value)
-          : event.target.value,
+      [event.target.name]: event.target.value,
     });
   };
   const handleSizeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -194,31 +305,20 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
     data.append("api_key", apiKey);
     data.append("timestamp", `${timestamp}`);
     data.append("signature", signature);
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD}/image/upload`,
-      {
-        method: "POST",
-        body: data,
-      }
-    );
-    const response = await res.json();
-    const currentId = imageState.map((image) => image.id);
-    setImageState((prevState) => [
-      ...prevState,
-      { id: currentId[0] === 0 ? 1 : 0, url: response.secure_url },
-    ]);
-  };
-
-  const handleDeleteProduct = async () => {
-    const productId = productBody.id!;
     try {
-      const response = await deleteProduct(productId);
-      if (response?.successful === false) {
-        setErrorMessage(response.message);
-        return;
-      }
-      dispatch(changeOpenEditDialogStatus());
-      return response;
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD}/image/upload`,
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+      const response = await res.json();
+      const currentId = imageState.map((image) => image.id);
+      setImageState((prevState) => [
+        ...prevState,
+        { id: currentId[0] === 0 ? 1 : 0, url: response.secure_url },
+      ]);
     } catch (err) {
       setErrorMessage((err as Error).message);
     }
@@ -245,6 +345,11 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
       );
       if (saveResponse?.successful === false) {
         setErrorMessage(saveResponse?.message);
+        const numberOfErrors = checkValidations();
+        if (numberOfErrors > 0) {
+          setDisabledSaveStatus(true);
+          return;
+        }
         return;
       }
       dispatch(changeOpenEditDialogStatus());
@@ -266,8 +371,10 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               name={"title"}
               label="Title"
               sx={{ flexGrow: "1" }}
+              error={error.title.status}
               onChange={handleProductBodyChange}
               value={productBody.title}
+              helperText={error.title.status ? error.title.message : ""}
             />
             <ImageList sx={{ width: 250, height: 160, marginLeft: "1rem" }}>
               {imageState.map((item, index) => (
@@ -301,8 +408,10 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               label="Description"
               name={"description"}
               multiline
+              error={error.description.status}
               onChange={handleProductBodyChange}
               value={productBody.description}
+              helperText={error.description.status ? error.description.message : ""}
             />
           </FormGroup>
           <FormGroup
@@ -321,8 +430,10 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>,
               }}
+              error={error.price.status}
               onChange={handleProductBodyChange}
               value={productBody.price}
+              helperText={error.price.status ? error.price.message : ""}
             />
             <TextField
               id="outlined-stock"
@@ -330,6 +441,8 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               label="Stock"
               onChange={handleProductBodyChange}
               value={productBody.stock}
+              error={error.stock.status}
+              helperText={error.stock.status ? error.stock.message : ""}
             />
             {product && (
               <Typography variant="overline" display="block" gutterBottom>
@@ -432,11 +545,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
                 />
                 <FormControlLabel
                   control={
-                    <Checkbox
-                      checked={tagState.shirts}
-                      onChange={handleTagChange}
-                      name={"shirts"}
-                    />
+                    <Checkbox checked={tagState.shirt} onChange={handleTagChange} name={"shirt"} />
                   }
                   label={"Shirt"}
                 />
@@ -461,15 +570,17 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
             sx={{ m: 2 }}
           >
             {dialogType === "edit" && (
-              // <Button variant="contained" color="error" onClick={handleDeleteProduct}>
-              //   Delete
-              // </Button>
               <ConfirmDeleteDialog variant="button" productsToDelete={[product!.id!]} />
             )}
             <Button variant="outlined" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="contained" disableElevation onClick={handleSave}>
+            <Button
+              variant="contained"
+              disableElevation
+              disabled={disabledSaveStatus}
+              onClick={handleSave}
+            >
               Save
             </Button>
           </Stack>

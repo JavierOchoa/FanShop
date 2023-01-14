@@ -54,6 +54,7 @@ export default function useAdmin() {
 
   const handleProductSave = async (product: ProductPost, typeEdit: ModalType) => {
     let response: ProductPostResponse | undefined;
+    console.log(product, typeEdit);
     try {
       typeEdit === "edit"
         ? (response = await postEditProduct(product))
