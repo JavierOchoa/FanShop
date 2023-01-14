@@ -1,14 +1,5 @@
 import { FC, PropsWithChildren } from "react";
-import {
-  Box,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-} from "@mui/material";
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar } from "@mui/material";
 
 export const AdminDrawer: FC<PropsWithChildren> = ({ children }) => {
   return (
@@ -22,7 +13,7 @@ export const AdminDrawer: FC<PropsWithChildren> = ({ children }) => {
       <Toolbar />
       <Box>
         <List>
-          {["Stats", "Products"].map((text, index) => (
+          {["Stats", "Products"].map((text) => (
             <ListItem key={text} disablePadding>
               <ListItemButton>
                 <ListItemText primary={text} />

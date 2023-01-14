@@ -1,18 +1,11 @@
 import React, { useEffect } from "react";
 import {
   alpha,
-  Autocomplete,
   Box,
-  Button,
   Checkbox,
-  FormControlLabel,
   IconButton,
-  MenuItem,
   Paper,
-  Select,
-  SelectChangeEvent,
   Skeleton,
-  Switch,
   Table,
   TableBody,
   TableCell,
@@ -20,18 +13,14 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TableSortLabel,
-  TextField,
   Toolbar,
   Tooltip,
   Typography,
 } from "@mui/material";
 import { AdminLayout } from "../../layouts";
 import { ProductAdminReponse, DetailedProduct, ModalType } from "../../interfaces";
-import { visuallyHidden } from "@mui/utils";
-import { Add, Delete } from "@mui/icons-material";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import { useGetProductsQuery, useGetProductDetailsMutation } from "./../../redux/services";
+import { Add } from "@mui/icons-material";
+import { useGetProductsQuery } from "./../../redux/services";
 import { ConfirmDeleteDialog, EditProductDialog } from "../../components/admin";
 import { useAppSelector, useAppDispatch } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
@@ -77,51 +66,6 @@ const headCells: readonly HeadCell[] = [
   },
 ];
 
-interface EnhancedTableToolbarProps {
-  tableToolbarTitle: string;
-  numSelected: number;
-}
-
-function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  const dispatch = useAppDispatch();
-  const { tableToolbarTitle, numSelected } = props;
-  return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        }),
-      }}
-    >
-      {numSelected > 0 ? (
-        <Typography sx={{ flex: "1 1 100%" }} color="inherit" variant="subtitle1" component="div">
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography sx={{ flex: "1 1 100%" }} variant="h6" id="tableTitle" component="div">
-          {tableToolbarTitle}
-        </Typography>
-      )}
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton>
-            <Delete />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="New Product" color={"primary"}>
-          <IconButton onClick={() => dispatch(changeOpenEditDialogStatus())}>
-            <Add />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
-  );
-}
-
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { onSelectAllClick, numSelected, rowCount } = props;
 
@@ -156,7 +100,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 export default function AdminPanel() {
   const dispatch = useAppDispatch();
   const { getDetailedProduct } = useAdmin();
-  const { data: productList, isLoading: loadingProductList } = useGetProductsQuery();
+  const { data: productList } = useGetProductsQuery();
   const [selected, setSelected] = React.useState<string[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState<number>(15);
@@ -186,7 +130,7 @@ export default function AdminPanel() {
     setSelected([]);
   };
 
-  const handleClick = (event: React.ChangeEvent<HTMLInputElement>, id: string) => {
+  const handleClick = (id: string) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected: string[] = [];
 
@@ -223,7 +167,6 @@ export default function AdminPanel() {
     <AdminLayout title="Admin Panel" pageDescription="Admin panel for FanShop">
       <Box sx={{ width: "100%" }}>
         <Paper sx={{ width: "100%", mb: 2 }}>
-          {/* <EnhancedTableToolbar tableToolbarTitle={"Product List"} numSelected={selected.length} /> */}
           <Toolbar
             sx={{
               pl: { sm: 2 },
@@ -249,18 +192,9 @@ export default function AdminPanel() {
               </Typography>
             )}
             {selected.length > 0 ? (
-              // <Tooltip title="Delete">
-              //   <IconButton onClick={handleDeleteSelected}>
-              //     <Delete />
-              //   </IconButton>
-              // </Tooltip>
               <ConfirmDeleteDialog variant={"tooltip"} productsToDelete={selected} />
             ) : (
               <Box>
-                {/* <Select value={sortType} label="Sort" onChange={handleProductListSort}>
-                  <MenuItem value={"ASC"}>"Ascending"</MenuItem>
-                  <MenuItem value={"DESC"}>Descending</MenuItem>
-                </Select> */}
                 <Tooltip title="New Product" color={"primary"}>
                   <IconButton onClick={() => handleOpenEditDialog("new")}>
                     <Add />
@@ -298,7 +232,7 @@ export default function AdminPanel() {
                               <Checkbox
                                 color="primary"
                                 checked={isItemSelected}
-                                onChange={(event) => handleClick(event, product.id)}
+                                onChange={() => handleClick(product.id)}
                                 inputProps={{
                                   "aria-labelledby": labelId,
                                 }}

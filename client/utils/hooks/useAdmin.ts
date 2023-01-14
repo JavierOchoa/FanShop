@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
-import { useAppSelector } from ".";
-import { DetailedProduct, ModalType, ProductPost, ProductPostResponse } from "../../interfaces";
+import { ModalType, ProductPost, ProductPostResponse } from "../../interfaces";
 import {
   useGetProductDetailsMutation,
   useEditProductMutation,
@@ -9,25 +7,14 @@ import {
 } from "../../redux/services";
 
 export default function useAdmin() {
-  const token = useAppSelector((state) => state.auth.token);
-  // const [getProducts, { data: productList, isLoading: loadingProducts }] = useGetProductsMutation();
   const [getProductInfo, { isLoading: loadingProductDetails }] = useGetProductDetailsMutation();
-  const [editProduct, { isLoading: loadingProductEdit }] = useEditProductMutation();
-  const [addProduct, { isLoading: loadingProductCreation }] = useAddProductMutation();
-  const [removeProduct, { isLoading: loadingProductRemoval }] = useRemoveProductMutation();
-  // const { data, isLoading: loLo } = useTestEndpointQuery();
-  const [finalProduct, setFinalProduct] = useState<DetailedProduct | undefined>(undefined);
-
-  // useEffect(() => {
-  //   if (token !== null) {
-  //     getProducts();
-  //   }
-  // }, [token]);
+  const [editProduct] = useEditProductMutation();
+  const [addProduct] = useAddProductMutation();
+  const [removeProduct] = useRemoveProductMutation();
 
   const getDetailedProduct = async (productId: string) => {
     try {
       const detailedProduct = await getProductInfo(productId).unwrap();
-      setFinalProduct(detailedProduct);
       return detailedProduct;
     } catch (err) {
       console.log(err);

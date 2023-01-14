@@ -1,7 +1,7 @@
 import { Toolbar, Box, CircularProgress } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { FC, PropsWithChildren, useEffect } from "react";
+import { FC, PropsWithChildren } from "react";
 import { AdminNav, AdminDrawer } from "../components/admin";
 import useAuth from "../utils/hooks/useAuth";
 

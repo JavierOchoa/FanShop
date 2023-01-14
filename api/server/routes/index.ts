@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { productsRouter } from "./products";
 import { seedRouter } from "./seed";
 import { userRouter } from "./user";
 import { adminRouter } from "./admin";

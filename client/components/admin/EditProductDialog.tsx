@@ -1,4 +1,4 @@
-import { ChangeEvent, createRef, FC, PropsWithChildren, useEffect, useState } from "react";
+import { ChangeEvent, FC, PropsWithChildren, useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -79,7 +79,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
   dialogType,
 }) => {
   const dispatch = useAppDispatch();
-  const { handleProductSave, deleteProduct } = useAdmin();
+  const { handleProductSave } = useAdmin();
   const [disabledSaveStatus, setDisabledSaveStatus] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [error, setError] = useState<errorState>({
@@ -290,6 +290,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
   const handleDeleteImage = (toDelete: string) => {
     const newImages = imageState.filter((image) => image.url !== toDelete);
     setImageState(newImages);
+    setDisabledSaveStatus(false);
   };
 
   const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -319,6 +320,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
         ...prevState,
         { id: currentId[0] === 0 ? 1 : 0, url: response.secure_url },
       ]);
+      setDisabledSaveStatus(false);
     } catch (err) {
       setErrorMessage((err as Error).message);
     }
