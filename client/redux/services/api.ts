@@ -1,10 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { AuthResponse, LoginRequest, UserInfo } from "../../interfaces";
-import type {
+import { AuthResponse, LoginRequest, User, UserInfo } from "../../interfaces";
+import {
   ProductAdminReponse,
   DetailedProduct,
   ProductPost,
-  ProductPostResponse,
+  APIResponse,
+  UserPost,
+  StatsResponse,
 } from "../../interfaces/admin";
 import { RootState } from "../store";
 
@@ -20,7 +22,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Products"],
+  tagTypes: ["Products", "Users", "UserInfo", "Product"],
   endpoints: (builder) => ({
     //Auth Endpoints
     login: builder.mutation<AuthResponse, LoginRequest>({
@@ -34,35 +36,90 @@ export const api = createApi({
       query: () => "/user/info",
     }),
     //Admin Enpoints
+    //Stats
+    getStats: builder.query<StatsResponse, void>({
+      query: () => "/admin/stats",
+    }),
+    //Products
     getProducts: builder.query<ProductAdminReponse[], void>({
       query: () => `/admin/products`,
       providesTags: ["Products"],
     }),
+    getProduct: builder.query<DetailedProduct, string>({
+      query: (productId) => `/admin/products/` + productId,
+      providesTags: ["Product"],
+    }),
     getProductDetails: builder.mutation<DetailedProduct, string>({
       query: (productId) => `/admin/products/` + productId,
     }),
-    editProduct: builder.mutation<ProductPostResponse, ProductPost>({
+    editProduct: builder.mutation<APIResponse, ProductPost>({
       query: (productToEdit) => ({
         url: "/admin/products/edit",
         method: "POST",
         body: productToEdit,
       }),
-      invalidatesTags: ["Products"],
+      invalidatesTags: ["Products", "Product"],
     }),
-    addProduct: builder.mutation<ProductPostResponse, ProductPost>({
+    addProduct: builder.mutation<APIResponse, ProductPost>({
       query: (productToAdd) => ({
         url: "/admin/products/add",
         method: "POST",
         body: productToAdd,
       }),
-      invalidatesTags: ["Products"],
+      invalidatesTags: ["Products", "Product"],
     }),
-    removeProduct: builder.mutation<ProductPostResponse, string>({
+    removeProduct: builder.mutation<APIResponse, string>({
       query: (productToDelete) => ({
         url: `/admin/products/delete/${productToDelete}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Products"],
+      invalidatesTags: ["Products", "Product"],
+    }),
+    //Users
+    getUsers: builder.query<User[], void>({
+      query: () => "/admin/users",
+      providesTags: ["Users"],
+    }),
+    getUser: builder.query<User, string>({
+      query: (userId) => "/admin/users/" + userId,
+      providesTags: ["UserInfo"],
+    }),
+    addUser: builder.mutation<APIResponse, UserPost>({
+      query: (userToAdd) => ({
+        url: "/admin/users/add",
+        method: "POST",
+        body: userToAdd,
+      }),
+      invalidatesTags: ["Users", "UserInfo"],
+    }),
+    editUser: builder.mutation<APIResponse, UserPost>({
+      query: (userToEdit) => ({
+        url: "/admin/users/edit",
+        method: "POST",
+        body: userToEdit,
+      }),
+      invalidatesTags: ["Users", "UserInfo"],
+    }),
+    activateUser: builder.mutation<UserPost, string>({
+      query: (userToActivate) => ({
+        url: `/admin/users/activate/${userToActivate}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Users", "UserInfo"],
+    }),
+    deactivateUser: builder.mutation<UserPost, string>({
+      query: (userToDeactivate) => ({
+        url: `/admin/users/deactivate/${userToDeactivate}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Users", "UserInfo"],
+    }),
+    removeUser: builder.mutation<UserPost, string>({
+      query: (userToDelete) => ({
+        url: `/admin/users/delete/${userToDelete}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"],
     }),
   }),
 });
@@ -70,9 +127,18 @@ export const api = createApi({
 export const {
   useLoginMutation,
   useGetUserInfoMutation,
+  useGetStatsQuery,
   useGetProductsQuery,
+  useGetProductQuery,
   useGetProductDetailsMutation,
   useEditProductMutation,
   useAddProductMutation,
   useRemoveProductMutation,
+  useGetUsersQuery,
+  useGetUserQuery,
+  useAddUserMutation,
+  useEditUserMutation,
+  useActivateUserMutation,
+  useDeactivateUserMutation,
+  useRemoveUserMutation,
 } = api;

@@ -11,7 +11,7 @@ export default function useAuth() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
-  const [getUserInfo, { data: userInfo, isLoading: gettingUserInfo }] = useGetUserInfoMutation();
+  const [getUserInfo, { data: userInfo }] = useGetUserInfoMutation();
   const [login, { isLoading: loginRequestLoading }] = useLoginMutation();
   const router = useRouter();
   useEffect(() => {

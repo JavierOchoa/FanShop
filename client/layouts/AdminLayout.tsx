@@ -17,7 +17,7 @@ export const AdminLayout: FC<PropsWithChildren<Props>> = ({
   pageDescription,
   imageFullUrl,
 }) => {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, user } = useAuth();
   const router = useRouter();
 
   if (isLoading) {
@@ -29,7 +29,7 @@ export const AdminLayout: FC<PropsWithChildren<Props>> = ({
       </Box>
     );
   }
-  if (!isLoading && !isAuthenticated) {
+  if (!user) {
     router.push(`/admin/login?p=${router.pathname}`);
     return <></>;
   }
