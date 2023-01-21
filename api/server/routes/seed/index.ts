@@ -4,6 +4,7 @@ import { productImageRepository, productRepository, userRepository } from "../..
 import { User } from "../../../appDataSource/entity";
 import { SeedProduct, SeedUser } from "../../../interfaces";
 import passport from "passport";
+import { routeResponse } from "..";
 
 export const seedRouter = Router();
 
@@ -12,10 +13,7 @@ seedRouter.get("/", passport.authenticate("jwt", { session: false }), async (req
     const user = req.user as User;
 
     if (!user.roles.includes("admin")) {
-      res.send({
-        successful: false,
-        message: "Unauthorized",
-      });
+      res.status(401).send(routeResponse(false, "Unauthorized"));
       return;
     }
 
@@ -36,16 +34,10 @@ seedRouter.get("/", passport.authenticate("jwt", { session: false }), async (req
 
     await Promise.all(productPromises);
 
-    res.send({
-      successful: true,
-      message: "Seed executed",
-    });
+    res.send(routeResponse(true, "Seed executed"));
   } catch (error) {
     const reason = handleError(error);
-    res.send({
-      successful: false,
-      message: reason,
-    });
+    res.send(routeResponse(false, reason));
   }
 });
 

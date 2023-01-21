@@ -2,6 +2,7 @@ import { Router } from "express";
 import passport from "passport";
 import { productImageRepository, productRepository } from "../../../appDataSource";
 import { Product, User } from "../../../appDataSource/entity";
+import { routeResponse } from "..";
 
 export const productsAdminRouter = Router();
 
@@ -9,10 +10,7 @@ productsAdminRouter.get("/", passport.authenticate("jwt", { session: false }), a
   try {
     const user = req.user as User;
     if (!user.roles.includes("admin")) {
-      res.status(401).send({
-        successful: false,
-        message: "Unauthorized",
-      });
+      res.status(401).send(routeResponse(false, "Unauthorized"));
       return;
     }
     const productsOnDb = await productRepository.find({
@@ -31,9 +29,9 @@ productsAdminRouter.get("/", passport.authenticate("jwt", { session: false }), a
       var textB = b.title.toUpperCase();
       return textA < textB ? -1 : textA > textB ? 1 : 0;
     });
-    res.send(sortedProducts);
+    res.send(routeResponse(true, "Products fetched", sortedProducts));
   } catch (err) {
-    console.log(err);
+    res.send(routeResponse(false, (err as Error).message));
   }
 });
 
@@ -44,16 +42,12 @@ productsAdminRouter.get(
     const { productId } = req.params;
     const user = req.user as User;
     if (!user.roles.includes("admin")) {
-      res.status(401).send({
-        successful: false,
-        message: "Unauthorized",
-      });
+      res.status(401).send(routeResponse(false, "Unauthorized"));
       return;
     }
     if (!productId) {
-      return res.send({
-        message: "No product id",
-      });
+      res.send(routeResponse(false, "No product id"));
+      return;
     }
     try {
       const productInformation = await productRepository.findOne({
@@ -65,9 +59,13 @@ productsAdminRouter.get(
           user: true,
         },
       });
+      if (!productInformation) {
+        res.send(routeResponse(false, `No product with ID: ${productId}`));
+        return;
+      }
       res.send(productInformation);
     } catch (err) {
-      console.log(err);
+      res.send(routeResponse(false, (err as Error).message));
     }
   }
 );
@@ -79,17 +77,11 @@ productsAdminRouter.post(
     const { id, title, price, description, stock, gender, sizes, tags, images } = req.body;
     const user = req.user as User;
     if (!user.roles.includes("admin")) {
-      res.status(401).send({
-        successful: false,
-        message: "Unauthorized",
-      });
+      res.status(401).send(routeResponse(false, "Unauthorized"));
       return;
     }
     if (!id) {
-      res.send({
-        successful: false,
-        message: "Product ID missing",
-      });
+      res.send(routeResponse(false, "Product ID missing"));
       return;
     }
     if (
@@ -102,20 +94,20 @@ productsAdminRouter.post(
       tags.length < 1 ||
       sizes.length < 1
     ) {
-      res.send({
-        successful: false,
-        message:
-          "Missing information or Wrong data. Please check all fields and select at least one size and tag",
-      });
+      res
+        .status(400)
+        .send(
+          routeResponse(
+            false,
+            "Missing information or Wrong data. Please check all fields and select at least one size and tag"
+          )
+        );
       return;
     }
     try {
       const productOnDb = await productRepository.findOne({ where: { id } });
       if (!productOnDb) {
-        res.send({
-          successful: false,
-          message: `No product found with ID: ${id}`,
-        });
+        res.send(routeResponse(false, `No product found with ID: ${id}`));
         return;
       }
 
@@ -133,15 +125,9 @@ productsAdminRouter.post(
       productOnDb.tags = tags;
       productOnDb.images = newImages;
       await productRepository.save(productOnDb);
-      res.send({
-        successful: true,
-        message: `Product ${id} has been updated successfully`,
-      });
+      res.status(200).send(routeResponse(true, `Product ${id} has been updated successfully`));
     } catch (err) {
-      res.send({
-        successful: false,
-        message: (err as Error).message,
-      });
+      res.send(routeResponse(false, (err as Error).message));
       return;
     }
   }
@@ -154,10 +140,7 @@ productsAdminRouter.post(
     const { title, price, description, stock, gender, sizes, tags, images } = req.body;
     const user = req.user as User;
     if (!user.roles.includes("admin")) {
-      res.status(401).send({
-        successful: false,
-        message: "Unauthorized",
-      });
+      res.status(401).send(routeResponse(false, "Unauthorized"));
       return;
     }
     try {
@@ -178,15 +161,9 @@ productsAdminRouter.post(
         user,
       });
       await productRepository.save(newProduct);
-      res.send({
-        successful: true,
-        message: `Product has been created`,
-      });
+      res.send(routeResponse(true, "Product has been created"));
     } catch (err) {
-      res.send({
-        successful: false,
-        message: (err as Error).message,
-      });
+      res.send(routeResponse(false, (err as Error).message));
       return;
     }
   }
@@ -199,18 +176,12 @@ productsAdminRouter.delete(
     const user = req.user as User;
     const { id } = req.params;
     if (!user.roles.includes("admin")) {
-      res.status(401).send({
-        successful: false,
-        message: "Unauthorized",
-      });
+      res.status(401).send(routeResponse(false, "Unauthorized"));
     }
     try {
       const productOnDb = await productRepository.findOne({ where: { id } });
       if (!productOnDb) {
-        res.send({
-          successful: false,
-          message: `No product with ID: ${id}`,
-        });
+        res.send(routeResponse(false, `No product with ID: ${id}`));
         return;
       }
       await productRepository
@@ -220,16 +191,9 @@ productsAdminRouter.delete(
         .where("id = :id", { id })
         .execute();
 
-      res.send({
-        successful: true,
-        message: `Product with ID: ${id} has been deleted`,
-      });
+      res.send(routeResponse(true, `Product with ID: ${id} has been deleted`));
     } catch (err) {
-      console.log(err);
-      res.send({
-        successful: true,
-        message: (err as Error).message,
-      });
+      res.send(routeResponse(true, (err as Error).message));
     }
   }
 );

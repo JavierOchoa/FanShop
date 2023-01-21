@@ -10,3 +10,12 @@ routes.use("/auth", authRouter);
 routes.use("/seed", seedRouter);
 routes.use("/admin", adminRouter);
 routes.use("/user", userRouter);
+
+export const routeResponse = (successful: boolean, message: string, data?: any, token?: string) => {
+  return {
+    successful,
+    message,
+    ...(data && { data }),
+    ...(token && { token }),
+  };
+};

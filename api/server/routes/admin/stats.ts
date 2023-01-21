@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
+import { routeResponse } from "..";
 import { productRepository, userRepository } from "../../../appDataSource";
 import { User } from "../../../appDataSource/entity";
 
@@ -8,10 +9,7 @@ export const statsAdminRouter = Router();
 statsAdminRouter.get("/", passport.authenticate("jwt", { session: false }), async (req, res) => {
   const user = req.user as User;
   if (!user.roles.includes("admin")) {
-    res.status(401).send({
-      successful: false,
-      message: "Unauthorized",
-    });
+    res.status(401).send(routeResponse(false, "Unauthorized"));
     return;
   }
   try {
@@ -24,12 +22,9 @@ statsAdminRouter.get("/", passport.authenticate("jwt", { session: false }), asyn
       normalUsers: usersOnDb.filter((user) => !user.roles.includes("admin")).length,
       adminUsers: usersOnDb.filter((user) => user.roles.includes("admin")).length,
     };
-    res.send(stats);
+    res.send(routeResponse(true, "Stats fetched", stats));
   } catch (err) {
-    res.send({
-      successful: false,
-      message: (err as Error).message,
-    });
+    res.send(routeResponse(false, (err as Error).message));
     return;
   }
 });
