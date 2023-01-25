@@ -10,6 +10,9 @@ import {
   DialogTitle,
   FormControl,
   FormGroup,
+  FormHelperText,
+  IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   OutlinedInput,
@@ -24,6 +27,7 @@ import { APIResponse, ErrorUserState, ModalType, UserPost } from "../../../../in
 import { ConfirmDeleteDialog } from "../../ConfirmDeleteDialog";
 import useAdmin from "../../../../utils/hooks/useAdmin";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface Props {
   userId: string | undefined;
@@ -63,6 +67,8 @@ export const UserDialog: FC<PropsWithChildren<Props>> = ({ userId, openStatus, d
   const [disabledSaveStatus, setDisabledSaveStatus] = useState<boolean>(true);
   const [error, setError] = useState<ErrorUserState>(defaultError);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+  const [showPassword, setShowPassword] = useState(false);
+
   useEffect(() => {
     if (userData?.id) {
       setUser(userData);
@@ -72,6 +78,8 @@ export const UserDialog: FC<PropsWithChildren<Props>> = ({ userId, openStatus, d
     if (dialogType === "edit" && userData?.id) setUser(userData);
     if (dialogType === "new") setUser(emptyUser);
   }, [dialogType]);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const validate = (fieldToValidate: "fullName" | "email" | "password", value: string) => {
     if (fieldToValidate === "fullName") {
@@ -189,7 +197,7 @@ export const UserDialog: FC<PropsWithChildren<Props>> = ({ userId, openStatus, d
   };
   return (
     <Dialog open={openStatus} onClose={handleClose} fullWidth={true} maxWidth={"xs"}>
-      <DialogTitle>Test Dialog</DialogTitle>
+      <DialogTitle>User Information</DialogTitle>
       <DialogContent>
         <Box sx={{ m: 1 }}>
           <FormGroup
@@ -220,16 +228,48 @@ export const UserDialog: FC<PropsWithChildren<Props>> = ({ userId, openStatus, d
               helperText={error.email.status ? error.email.message : ""}
             ></TextField>
             {dialogType === "new" && (
-              <TextField
-                sx={{ mb: 1 }}
-                id={"outlined-password"}
-                label={"Password"}
-                name={"password"}
-                onChange={handleBodyChange}
-                value={user?.password}
-                error={error.password?.status}
-                helperText={error.password?.status ? error.password?.message : ""}
-              ></TextField>
+              // <TextField
+              //   sx={{ mb: 1 }}
+              //   id={"outlined-password"}
+              //   label={"Password"}
+              //   name={"password"}
+              //   onChange={handleBodyChange}
+              //   value={user?.password}
+              //   error={error.password?.status}
+              //   helperText={error.password?.status ? error.password?.message : ""}
+              // ></TextField>
+              <FormControl variant="outlined">
+                <InputLabel htmlFor="password" sx={{ pt: 1 }}>
+                  Password
+                </InputLabel>
+                <OutlinedInput
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  onChange={handleBodyChange}
+                  label={"Password"}
+                  name={"password"}
+                  value={user?.password}
+                  error={error.password?.status ? true : false}
+                  // helpertext={error.password?.status ? error.password?.message : ""}
+                  sx={{ mt: 1 }}
+                />
+                {error.password?.status && (
+                  <FormHelperText error id="password-error-text">
+                    {error.password?.message}
+                  </FormHelperText>
+                )}
+              </FormControl>
             )}
           </FormGroup>
           <Box
@@ -266,7 +306,9 @@ export const UserDialog: FC<PropsWithChildren<Props>> = ({ userId, openStatus, d
                 ))}
               </Select>
             </FormControl>
-            <Button onClick={handleStatus}>{user.isActive ? "Deactivate" : "Activate"}</Button>
+            {dialogType === "edit" && (
+              <Button onClick={handleStatus}>{user.isActive ? "Deactivate" : "Activate"}</Button>
+            )}
           </Box>
           {errorMessage && (
             <Alert variant="filled" severity="error">

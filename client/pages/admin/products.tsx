@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { useState } from "react";
 import { ProductDialog, TableComponent } from "../../components/admin";
 import { ModalType, TableHeadCell } from "../../interfaces";
@@ -49,19 +50,29 @@ export default function AdminProducts() {
   };
   return (
     <AdminLayout title={"Products"} pageDescription={"Product list in Admin Panel"}>
-      <TableComponent
-        tableTitle={"Product List"}
-        elements={productList}
-        handleOpenEditDialog={handleOpenEditDialog}
-        headCells={headCells}
-        initialRowsPerPage={15}
-        tableType={"products"}
-      />
-      <ProductDialog
-        productId={detailedProduct}
-        openStatus={openEditDialog}
-        dialogType={modalType}
-      />
+      {productList ? (
+        productList.successful ? (
+          <Box>
+            <TableComponent
+              tableTitle={"Product List"}
+              elements={productList.data}
+              handleOpenEditDialog={handleOpenEditDialog}
+              headCells={headCells}
+              initialRowsPerPage={15}
+              tableType={"product"}
+            />
+            <ProductDialog
+              productId={detailedProduct}
+              openStatus={openEditDialog}
+              dialogType={modalType}
+            />
+          </Box>
+        ) : (
+          <Box>Error</Box>
+        )
+      ) : (
+        <Box>No Products</Box>
+      )}
     </AdminLayout>
   );
 }

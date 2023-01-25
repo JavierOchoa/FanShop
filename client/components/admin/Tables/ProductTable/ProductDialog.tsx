@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -89,7 +90,7 @@ export const ProductDialog: FC<PropsWithChildren<Props>> = ({
   dialogType,
 }) => {
   const dispatch = useAppDispatch();
-  const { data: productData } = useGetProductQuery(productId ?? skipToken);
+  const { data: productData, isLoading } = useGetProductQuery(productId ?? skipToken);
   const { handleProductSave } = useAdmin();
   const [productBody, setProductBody] = useState<ProductBody>(emptyProductBody);
   const [sizeState, setSizeState] = useState<SizeState>(emptySizeState);
@@ -106,6 +107,12 @@ export const ProductDialog: FC<PropsWithChildren<Props>> = ({
     }
     setDisabledSaveStatus(true);
   }, [productData]);
+
+  // useEffect(() => {
+  //   const copy = productBody;
+  //   setProductBody(emptyProductBody);
+  //   setProductBody(copy);
+  // }, [imageState]);
 
   useEffect(() => {
     if (dialogType === "edit" && productData?.id) {
@@ -293,8 +300,17 @@ export const ProductDialog: FC<PropsWithChildren<Props>> = ({
       );
       const response = await res.json();
       const currentId = imageState.map((image) => image.id);
-      setImageState((prevState) => [
-        ...prevState,
+      // setImageState((prevState) => [
+      //   ...prevState,
+      //   { id: currentId[0] === 0 ? 1 : 0, url: response.secure_url },
+      // ]);
+      const productBodyCopy = productBody;
+      const imageStateCopy = imageState;
+      setProductBody(emptyProductBody);
+      setImageState([]);
+      setProductBody(productBodyCopy);
+      setImageState(() => [
+        ...imageStateCopy,
         { id: currentId[0] === 0 ? 1 : 0, url: response.secure_url },
       ]);
       setDisabledSaveStatus(false);
@@ -338,7 +354,7 @@ export const ProductDialog: FC<PropsWithChildren<Props>> = ({
   };
   return (
     <Dialog open={openStatus} onClose={handleClose} fullWidth={true} maxWidth={"xl"}>
-      <DialogTitle>Edit product information</DialogTitle>
+      <DialogTitle>Product Information</DialogTitle>
       <DialogContent>
         <Box sx={{ m: 1 }}>
           <FormGroup row sx={{ alignItems: "center", margin: "1rem 0" }}>
@@ -353,27 +369,26 @@ export const ProductDialog: FC<PropsWithChildren<Props>> = ({
               helperText={error.title.status ? error.title.message : ""}
             />
             <ImageList sx={{ width: 250, height: 160, marginLeft: "1rem" }}>
-              {imageState.map((item, index) => (
-                <Box key={index}>
-                  <NestedImageModal
-                    imageLink={item.url}
-                    altText={`${productBody.title} ${index}`}
-                  />
-                  <Button variant="text" onClick={() => handleDeleteImage(item.url)}>
-                    Delete
-                  </Button>
-                </Box>
-              ))}
+              {isLoading ? (
+                <CircularProgress />
+              ) : (
+                imageState.map((item, index) => (
+                  <Box key={index + Math.random()}>
+                    <NestedImageModal
+                      imageLink={item.url}
+                      altText={`${productBody.title} - ${item.id}`}
+                    />
+                    <Button variant="text" onClick={() => handleDeleteImage(item.url)}>
+                      Delete
+                    </Button>
+                  </Box>
+                ))
+              )}
+
               {imageState.length < 2 && (
                 <Button variant="contained" component="label">
                   Upload
-                  <input
-                    hidden
-                    accept="image/*"
-                    multiple
-                    type="file"
-                    onChange={handleImageUpload}
-                  />
+                  <input hidden accept="image/*" type="file" onChange={handleImageUpload} />
                 </Button>
               )}
             </ImageList>

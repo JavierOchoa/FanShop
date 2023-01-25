@@ -55,7 +55,7 @@ export default function AdminUser() {
         handleOpenEditDialog={handleOpenEditDialog}
         headCells={headCells}
         initialRowsPerPage={15}
-        tableType={"users"}
+        tableType={"user"}
       />
       <UserDialog userId={detailedUser} openStatus={openEditDialog} dialogType={modalType} />
     </AdminLayout>

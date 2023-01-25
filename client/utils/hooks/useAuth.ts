@@ -34,12 +34,12 @@ export default function useAuth() {
   }, [userInfo]);
 
   const userLogin = async (credentials: LoginRequest) => {
-    const data = await login(credentials).unwrap();
-    if (data.token) {
-      setCookie("fsToken", data.token, { expires: 8 });
-      dispatch(setToken(data.token));
+    const { successful, message, data } = await login(credentials).unwrap();
+    if (successful) {
+      setCookie("fsToken", data, { expires: 8 });
+      dispatch(setToken(data!));
     }
-    return data;
+    return { successful, message, data };
   };
 
   const userLogout = () => {

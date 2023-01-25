@@ -1,12 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AuthResponse, LoginRequest, User, UserInfo } from "../../interfaces";
 import {
-  ProductAdminReponse,
   DetailedProduct,
   ProductPost,
   APIResponse,
   UserPost,
   StatsResponse,
+  APIProductResponse,
 } from "../../interfaces/admin";
 import { RootState } from "../store";
 
@@ -22,7 +22,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Products", "Users", "UserInfo", "Product"],
+  tagTypes: ["Products", "Users", "UserInfo", "Product", "Stats"],
   endpoints: (builder) => ({
     //Auth Endpoints
     login: builder.mutation<AuthResponse, LoginRequest>({
@@ -39,9 +39,10 @@ export const api = createApi({
     //Stats
     getStats: builder.query<StatsResponse, void>({
       query: () => "/admin/stats",
+      providesTags: ["Stats"],
     }),
     //Products
-    getProducts: builder.query<ProductAdminReponse[], void>({
+    getProducts: builder.query<APIProductResponse, void>({
       query: () => `/admin/products`,
       providesTags: ["Products"],
     }),
@@ -119,7 +120,7 @@ export const api = createApi({
         url: `/admin/users/delete/${userToDelete}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Users"],
+      invalidatesTags: ["Users", "Stats"],
     }),
   }),
 });

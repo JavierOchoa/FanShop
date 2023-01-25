@@ -28,7 +28,7 @@ interface Props {
   handleOpenEditDialog: (dialogType: ModalType, elementId?: string) => void;
   headCells: TableHeadCell[];
   initialRowsPerPage: number;
-  tableType: "products" | "users";
+  tableType: "product" | "user";
 }
 
 export const TableComponent: FC<PropsWithChildren<Props>> = ({
@@ -118,25 +118,29 @@ export const TableComponent: FC<PropsWithChildren<Props>> = ({
               <ConfirmDeleteDialog
                 variant={"tooltip"}
                 elements={selected}
-                elementType={"user"}
+                elementType={tableType}
                 action={"delete"}
               />
-              <ConfirmDeleteDialog
-                variant={"tooltip"}
-                elements={selected}
-                elementType={"user"}
-                action={"deactivate"}
-              />
-              <ConfirmDeleteDialog
-                variant={"tooltip"}
-                elements={selected}
-                elementType={"user"}
-                action={"activate"}
-              />
+              {tableType === "user" && (
+                <Stack direction={"row"}>
+                  <ConfirmDeleteDialog
+                    variant={"tooltip"}
+                    elements={selected}
+                    elementType={tableType}
+                    action={"deactivate"}
+                  />
+                  <ConfirmDeleteDialog
+                    variant={"tooltip"}
+                    elements={selected}
+                    elementType={tableType}
+                    action={"activate"}
+                  />
+                </Stack>
+              )}
             </Stack>
           ) : (
             <Box>
-              <Tooltip title="New Product" color={"primary"}>
+              <Tooltip title={`New ${tableType}`} color={"primary"}>
                 <IconButton onClick={() => handleOpenEditDialog("new")}>
                   <Add />
                 </IconButton>
@@ -160,7 +164,7 @@ export const TableComponent: FC<PropsWithChildren<Props>> = ({
                       const isItemSelected = isSelected(element.id);
                       // const labelId = `enhanced-table-checkbox-${index}`;
 
-                      if (tableType === "users") {
+                      if (tableType === "user") {
                         return (
                           <UsersTableRows
                             key={index}
@@ -171,7 +175,7 @@ export const TableComponent: FC<PropsWithChildren<Props>> = ({
                           />
                         );
                       }
-                      if (tableType === "products") {
+                      if (tableType === "product") {
                         return (
                           <ProductTableRows
                             key={index}

@@ -30,11 +30,11 @@ export const ConfirmDeleteDialog: FC<PropsWithChildren<Props>> = ({
 }) => {
   const dispatch = useAppDispatch();
   const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
-  const { deleteProducts, deleteUsers, deactivateUsers } = useAdmin();
+  const { deleteProducts, deleteUsers, deactivateUsers, activateUsers } = useAdmin();
   const [childDialogStatus, setChildDialogStatus] = useState<boolean>(false);
   const handleChildDialogStatus = () => setChildDialogStatus(!childDialogStatus);
   const handleActivate = () => {
-    deactivateUsers(elements);
+    activateUsers(elements);
     handleChildDialogStatus();
     openEditDialog ? dispatch(changeOpenEditDialogStatus()) : null;
   };

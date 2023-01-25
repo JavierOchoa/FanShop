@@ -1,8 +1,19 @@
 import React, { useState, createRef } from "react";
-import { Box, FormControl, FormLabel, Paper, TextField } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Paper,
+  TextField,
+} from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { useRouter } from "next/router";
 import useAuth from "../../utils/hooks/useAuth";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface InfoToValidate {
   email?: string | undefined;
@@ -14,8 +25,11 @@ export default function AdminLogin() {
   const inputEmail = createRef<HTMLInputElement>();
   const inputPassword = createRef<HTMLInputElement>();
   const { userLogin, loginRequestLoading } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<InfoToValidate>({});
   const router = useRouter();
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const validate = (toValidate: InfoToValidate) => {
     let objErr: InfoToValidate = {};
@@ -78,14 +92,38 @@ export default function AdminLogin() {
             error={error.email ? true : false}
             sx={{ mt: 1 }}
           />
-          <TextField
+          {/* <TextField
             fullWidth
             id="password"
             label="Password"
             inputRef={inputPassword}
             error={error.password ? true : false}
             sx={{ mt: 1 }}
-          />
+          /> */}
+          <FormControl variant="outlined">
+            <InputLabel htmlFor="password" sx={{ pt: 1 }}>
+              Password
+            </InputLabel>
+            <OutlinedInput
+              id="password"
+              type={showPassword ? "text" : "password"}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Password"
+              inputRef={inputPassword}
+              error={error.password ? true : false}
+              sx={{ mt: 1 }}
+            />
+          </FormControl>
           <LoadingButton
             onClick={handleClick}
             type={"submit"}
