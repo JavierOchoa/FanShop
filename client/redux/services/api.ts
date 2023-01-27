@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { AuthResponse, LoginRequest, User, UserInfo } from "../../interfaces";
+import { AuthResponse, ListedProducts, LoginRequest, User, UserInfo } from "../../interfaces";
 import {
   DetailedProduct,
   ProductPost,
@@ -122,6 +122,10 @@ export const api = createApi({
       }),
       invalidatesTags: ["Users", "Stats"],
     }),
+    //Products
+    getProductsList: builder.query<ListedProducts, string>({
+      query: (category?) => `/products/${category}`,
+    }),
   }),
 });
 
@@ -142,4 +146,5 @@ export const {
   useActivateUserMutation,
   useDeactivateUserMutation,
   useRemoveUserMutation,
+  useGetProductsListQuery,
 } = api;
