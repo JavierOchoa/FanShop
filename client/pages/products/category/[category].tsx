@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import { useRouter } from "next/router";
-import { SpacedSubTypography } from "../../components";
-import { ProductList } from "../../components/Products/ProductGrid";
-import { PageLayout } from "../../layouts/PageLayout";
-import { useGetProductsListQuery } from "../../redux/services";
+import { SpacedSubTypography } from "../../../components";
+import { ProductList } from "../../../components/Products/ProductGrid";
+import { PageLayout } from "../../../layouts/PageLayout";
+import { useGetProductsListQuery } from "../../../redux/services";
 
 export default function CategoryProducts() {
   const router = useRouter();

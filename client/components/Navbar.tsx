@@ -90,7 +90,7 @@ export const Navbar = () => {
             >
               {pages.map((page) => (
                 <MenuItem key={page}>
-                  <Link href={`/products/${page}`}>
+                  <Link href={`/products/category/${page}`}>
                     <Typography textAlign="center">{page}</Typography>
                   </Link>
                 </MenuItem>
@@ -119,7 +119,7 @@ export const Navbar = () => {
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
               <Button key={page} sx={{ my: 2, color: "white", display: "block" }}>
-                <Link href={`/products/${page.toLowerCase()}`}>{page}</Link>
+                <Link href={`/products/category/${page.toLowerCase()}`}>{page}</Link>
               </Button>
             ))}
           </Box>

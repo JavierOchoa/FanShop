@@ -5,7 +5,7 @@ import { Product } from "../../appDataSource/entity";
 
 export const productRouter = Router();
 
-productRouter.get("/:category", async (req, res) => {
+productRouter.get("/category/:category", async (req, res) => {
   const { category } = req.params;
   let productsResponse: Product[] = [];
   try {
@@ -36,6 +36,22 @@ productRouter.get("/:category", async (req, res) => {
       productsResponse = productsOnDb;
     }
     res.send(routeResponse(true, "Product List", productsResponse));
+  } catch (err) {
+    res.send(routeResponse(false, (err as Error).message));
+  }
+});
+
+productRouter.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const productOnDb = await productRepository.findOne({
+      where: { id },
+      relations: { images: true },
+    });
+    if (!productOnDb) {
+      return res.send(routeResponse(false, "No product with id"));
+    }
+    res.send(routeResponse(true, "Product Information Ready", productOnDb));
   } catch (err) {
     res.send(routeResponse(false, (err as Error).message));
   }

@@ -8,6 +8,7 @@ import {
   StatsResponse,
   APIProductResponse,
 } from "../../interfaces/admin";
+import { APIProductInformation } from "../../interfaces/products/ProductInformation";
 import { RootState } from "../store";
 
 export const api = createApi({
@@ -124,7 +125,10 @@ export const api = createApi({
     }),
     //Products
     getProductsList: builder.query<ListedProducts, string>({
-      query: (category?) => `/products/${category}`,
+      query: (category?) => `/products/category/${category}`,
+    }),
+    getProductInformation: builder.query<APIProductInformation, string>({
+      query: (productId?) => `/products/${productId}`,
     }),
   }),
 });
@@ -147,4 +151,5 @@ export const {
   useDeactivateUserMutation,
   useRemoveUserMutation,
   useGetProductsListQuery,
+  useGetProductInformationQuery,
 } = api;
