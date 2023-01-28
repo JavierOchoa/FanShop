@@ -4,14 +4,14 @@ import { ModalType, TableHeadCell } from "../../interfaces";
 import { AdminLayout } from "../../layouts";
 import { useGetUsersQuery } from "../../redux/services";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
-import { changeOpenEditDialogStatus, changeDialogType } from "./../../redux/slices/productSlice";
+import { changeOpenEditDialogStatus, changeDialogType } from "../../redux/slices/adminSlice";
 
 export default function AdminUser() {
   const dispatch = useAppDispatch();
   const { data: userList } = useGetUsersQuery();
-  const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
+  const openEditDialog = useAppSelector((state) => state.admin.openEditDialog);
   const [detailedUser, setDetailedUser] = useState<string | undefined>(undefined);
-  const modalType = useAppSelector((state) => state.products.dialogType);
+  const modalType = useAppSelector((state) => state.admin.dialogType);
   const headCells: TableHeadCell[] = [
     {
       id: "fullName",

@@ -10,8 +10,8 @@ import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 export default function AdminProducts() {
   const dispatch = useAppDispatch();
   const { data: productList } = useGetProductsQuery();
-  const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
-  const modalType = useAppSelector((state) => state.products.dialogType);
+  const openEditDialog = useAppSelector((state) => state.admin.openEditDialog);
+  const modalType = useAppSelector((state) => state.admin.dialogType);
   const [detailedProduct, setDetailedProduct] = useState<string | undefined>(undefined);
 
   const headCells: TableHeadCell[] = [

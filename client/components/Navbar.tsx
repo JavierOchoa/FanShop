@@ -44,8 +44,6 @@ export const Navbar = () => {
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="/"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -56,7 +54,7 @@ export const Navbar = () => {
               textDecoration: "none",
             }}
           >
-            FANSHOP
+            <Link href={"/"}>FANSHOP</Link>
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -90,7 +88,7 @@ export const Navbar = () => {
             >
               {pages.map((page) => (
                 <MenuItem key={page}>
-                  <Link href={`/products/category/${page}`}>
+                  <Link href={`/products/category/[category]`} as={`/products/category/${page}`}>
                     <Typography textAlign="center">{page}</Typography>
                   </Link>
                 </MenuItem>
@@ -101,8 +99,6 @@ export const Navbar = () => {
           <Typography
             variant="h5"
             noWrap
-            component="a"
-            href=""
             sx={{
               mr: 2,
               display: { xs: "flex", md: "none" },
@@ -114,12 +110,18 @@ export const Navbar = () => {
               textDecoration: "none",
             }}
           >
-            FANSHOP
+            <Link href={"/"}>FANSHOP</Link>{" "}
           </Typography>
+
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
               <Button key={page} sx={{ my: 2, color: "white", display: "block" }}>
-                <Link href={`/products/category/${page.toLowerCase()}`}>{page}</Link>
+                <Link
+                  href={`/products/category/[category]`}
+                  as={`/products/category/${page.toLowerCase()}`}
+                >
+                  {page}
+                </Link>
               </Button>
             ))}
           </Box>

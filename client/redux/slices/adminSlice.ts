@@ -1,18 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ModalType } from "../../interfaces";
 
-interface ProductState {
+interface AdminState {
   openEditDialog: boolean;
   dialogType: ModalType;
 }
 
-const initialState: ProductState = {
+const initialState: AdminState = {
   openEditDialog: false,
   dialogType: "new",
 };
 
-export const productSlice = createSlice({
-  name: "product",
+export const adminSlice = createSlice({
+  name: "admin",
   initialState,
   reducers: {
     changeOpenEditDialogStatus: (state) => {
@@ -24,6 +24,6 @@ export const productSlice = createSlice({
   },
 });
 
-export const { changeOpenEditDialogStatus, changeDialogType } = productSlice.actions;
+export const { changeOpenEditDialogStatus, changeDialogType } = adminSlice.actions;
 
-export default productSlice.reducer;
+export default adminSlice.reducer;

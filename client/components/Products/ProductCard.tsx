@@ -18,13 +18,11 @@ export const ProductCard: FC<PropsWithChildren<Props>> = ({ product }) => {
       item
       xs={6}
       sm={4}
-      // sx={{ maxWidth: 400 }}
-      // sx={{ maxWidth: 400, mx: 2, my: 1 }}
       key={product.id}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={"product/slug"} passHref prefetch={false}>
+      <Link href={`/products/[id]`} as={`/products/${product.id}`} prefetch={false}>
         <Card>
           <CardActionArea>
             <CardMedia component="img" image={productImage} />

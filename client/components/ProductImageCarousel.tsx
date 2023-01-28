@@ -9,6 +9,8 @@ interface Props {
   images: ImageInProduct[];
 }
 
+const hw = 600;
+
 export const ProductImageCarousel: FC<PropsWithChildren<Props>> = ({ images }) => {
   return (
     <Carousel
@@ -20,12 +22,12 @@ export const ProductImageCarousel: FC<PropsWithChildren<Props>> = ({ images }) =
       emulateTouch={true}
       interval={5000}
       transitionTime={1000}
-      width={400}
+      width={hw}
     >
       {images.map((image, i) => {
         return (
           <Box key={i}>
-            <Image src={image.url} alt={image.id} width={400} height={400} />
+            <Image src={image.url} alt={image.id} width={hw} height={hw} />
           </Box>
         );
       })}
