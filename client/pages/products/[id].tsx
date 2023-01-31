@@ -7,24 +7,23 @@ import { ProductImageCarousel } from "../../components/ProductImageCarousel";
 import { CartItem } from "../../interfaces";
 import { PageLayout } from "../../layouts";
 import { useGetProductInformationQuery } from "../../redux/services";
+import { addToCart } from "../../redux/slices";
+import { useAppDispatch } from "../../utils/hooks";
 
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function ProductPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const productId = router.query.id as string;
   const [buttonStatus, setButtonStatus] = useState<boolean>(true);
   const [body, setBody] = useState<CartItem>({
-    productId: "",
+    id: "",
     quantity: 1,
     size: "",
   });
   const handleBodyChange = (event: MouseEvent<HTMLButtonElement>) => {
     const id = event.currentTarget.id;
-    setBody({
-      ...body,
-      productId: productId,
-    });
     if (id === "increase") {
       setBody({
         ...body,
@@ -41,11 +40,15 @@ export default function ProductPage() {
       setButtonStatus(false);
       setBody({
         ...body,
+        id: productId,
         size: id,
       });
     }
   };
 
+  const handleAddToCart = () => {
+    dispatch(addToCart(body));
+  };
   const { data: productInformation } = useGetProductInformationQuery(productId);
   return (
     <PageLayout title={"Product Page"} pageDescription={"Detailed product page"}>
@@ -102,7 +105,12 @@ export default function ProductPage() {
                 })}
               </ButtonGroup>
             </Box>
-            <Button disabled={buttonStatus} variant={"contained"} sx={{ mb: 3 }}>
+            <Button
+              disabled={buttonStatus}
+              onClick={handleAddToCart}
+              variant={"contained"}
+              sx={{ mb: 3 }}
+            >
               Add to cart
             </Button>
             <Box>
