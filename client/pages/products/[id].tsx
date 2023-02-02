@@ -16,10 +16,14 @@ export default function ProductPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const productId = router.query.id as string;
+  const { data: productInformation } = useGetProductInformationQuery(productId);
   const [buttonStatus, setButtonStatus] = useState<boolean>(true);
   const [body, setBody] = useState<CartItem>({
     id: "",
+    title: "",
+    image: "",
     quantity: 1,
+    price: 0,
     size: "",
   });
   const handleBodyChange = (event: MouseEvent<HTMLButtonElement>) => {
@@ -41,6 +45,9 @@ export default function ProductPage() {
       setBody({
         ...body,
         id: productId,
+        title: productInformation!.data.title,
+        image: productInformation!.data.images[0].url,
+        price: productInformation!.data.price,
         size: id,
       });
     }
@@ -49,7 +56,7 @@ export default function ProductPage() {
   const handleAddToCart = () => {
     dispatch(addToCart(body));
   };
-  const { data: productInformation } = useGetProductInformationQuery(productId);
+
   return (
     <PageLayout title={"Product Page"} pageDescription={"Detailed product page"}>
       {!productInformation && <Box>Loading</Box>}

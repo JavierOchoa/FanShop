@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AppBar,
   Avatar,
+  Badge,
   Box,
   Button,
   Container,
@@ -12,8 +13,10 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { LocalMall, Menu as MenuIcon } from "@mui/icons-material/";
+import { LocalMall, Menu as MenuIcon, ShoppingCart } from "@mui/icons-material/";
 import Link from "next/link";
+import { useAppSelector } from "../utils/hooks";
+import { CartItem } from "../interfaces";
 
 const pages = ["Men", "Women", "Kid"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
@@ -21,6 +24,10 @@ const settings = ["Profile", "Account", "Dashboard", "Logout"];
 export const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const cartCounter = useAppSelector((state) => state.user.cart) as CartItem[];
+  const [counter, setCounter] = useState<number>(0);
+
+  useEffect(() => setCounter(cartCounter.length), [cartCounter]);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -41,6 +48,7 @@ export const Navbar = () => {
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <LocalMall sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+
           <Typography
             variant="h6"
             noWrap
@@ -125,9 +133,16 @@ export const Navbar = () => {
               </Button>
             ))}
           </Box>
+          <IconButton color={"inherit"}>
+            <Link href={"/cart"}>
+              <Badge badgeContent={counter} color={"secondary"}>
+                <ShoppingCart />
+              </Badge>
+            </Link>
+          </IconButton>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
+            <Tooltip title="Open settings" sx={{ ml: 1 }}>
               <IconButton onClick={handleOpenUserMenu}>
                 <Avatar alt="User" />
               </IconButton>
