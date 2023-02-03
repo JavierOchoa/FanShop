@@ -40,8 +40,3 @@ export interface ProductErrorState {
   stock: errorStatus;
   gender: errorStatus;
 }
-
-// interface errorStatus {
-//   status: boolean;
-//   message: string;
-// }

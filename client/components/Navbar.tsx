@@ -5,6 +5,7 @@ import {
   Badge,
   Box,
   Button,
+  CircularProgress,
   Container,
   IconButton,
   Menu,
@@ -17,6 +18,8 @@ import { LocalMall, Menu as MenuIcon, ShoppingCart } from "@mui/icons-material/"
 import Link from "next/link";
 import { useAppSelector } from "../utils/hooks";
 import { CartItem } from "../interfaces";
+import useAuth from "../utils/hooks/useAuth";
+import { LoginDialog } from "./auth";
 
 const pages = ["Men", "Women", "Kid"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
@@ -26,6 +29,7 @@ export const Navbar = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const cartCounter = useAppSelector((state) => state.user.cart) as CartItem[];
   const [counter, setCounter] = useState<number>(0);
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => setCounter(cartCounter.length), [cartCounter]);
 
@@ -44,10 +48,13 @@ export const Navbar = () => {
     setAnchorElUser(null);
   };
   return (
-    <AppBar position="static">
+    <AppBar position="static" elevation={0}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <LocalMall sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+          <IconButton color={"primary"}>
+            {/* <ShoppingCart /> */}
+            <LocalMall sx={{ display: { xs: "none", color: "primary", md: "flex" }, mr: 1 }} />
+          </IconButton>
 
           <Typography
             variant="h6"
@@ -58,11 +65,13 @@ export const Navbar = () => {
               fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
-              color: "inherit",
+              color: "primary.main",
               textDecoration: "none",
             }}
           >
-            <Link href={"/"}>FANSHOP</Link>
+            <Link href={"/"} as={"/"}>
+              FANSHOP
+            </Link>
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -72,7 +81,7 @@ export const Navbar = () => {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-              color="inherit"
+              // color="inherit"
             >
               <MenuIcon />
             </IconButton>
@@ -114,7 +123,7 @@ export const Navbar = () => {
               fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
-              color: "inherit",
+              // color: "inherit",
               textDecoration: "none",
             }}
           >
@@ -123,7 +132,7 @@ export const Navbar = () => {
 
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
-              <Button key={page} sx={{ my: 2, color: "white", display: "block" }}>
+              <Button key={page} sx={{ my: 2, display: "block" }}>
                 <Link
                   href={`/products/category/[category]`}
                   as={`/products/category/${page.toLowerCase()}`}
@@ -133,43 +142,48 @@ export const Navbar = () => {
               </Button>
             ))}
           </Box>
-          <IconButton color={"inherit"}>
+          <IconButton color={"primary"} sx={{ mx: 2 }}>
             <Link href={"/cart"}>
-              <Badge badgeContent={counter} color={"secondary"}>
+              <Badge badgeContent={counter}>
                 <ShoppingCart />
               </Badge>
             </Link>
           </IconButton>
 
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings" sx={{ ml: 1 }}>
-              <IconButton onClick={handleOpenUserMenu}>
-                <Avatar alt="User" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+          {!isAuthenticated && isLoading && <CircularProgress />}
+          {!isAuthenticated && !isLoading && <LoginDialog />}
+
+          {isAuthenticated && (
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings" sx={{ ml: 1 }}>
+                <IconButton onClick={handleOpenUserMenu}>
+                  <Avatar alt="User" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {settings.map((setting) => (
+                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                    <Typography textAlign="center">{setting}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+          )}
         </Toolbar>
       </Container>
     </AppBar>

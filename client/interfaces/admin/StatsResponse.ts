@@ -1,4 +1,4 @@
-import { APIResponse } from "./ProductPostResponse";
+import { APIResponse } from "..";
 
 export interface StatsResponse extends APIResponse {
   data: Stats;

@@ -1,5 +1,5 @@
 import { User } from "../auth/user";
-import { APIResponse } from "./ProductPostResponse";
+import { APIResponse } from "../";
 
 export interface APIProductResponse extends APIResponse {
   data: ProductAdminReponse[];

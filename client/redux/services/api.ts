@@ -1,5 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { AuthResponse, ListedProducts, LoginRequest, User, UserInfo } from "../../interfaces";
+import {
+  AuthResponse,
+  ListedProducts,
+  LoginRequest,
+  SignUpRequest,
+  User,
+  UserInfo,
+} from "../../interfaces";
 import {
   DetailedProduct,
   ProductPost,
@@ -29,6 +36,13 @@ export const api = createApi({
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (credentials) => ({
         url: "/auth/login",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    signUp: builder.mutation<AuthResponse, SignUpRequest>({
+      query: (credentials) => ({
+        url: "/auth/signup",
         method: "POST",
         body: credentials,
       }),
@@ -135,6 +149,7 @@ export const api = createApi({
 
 export const {
   useLoginMutation,
+  useSignUpMutation,
   useGetUserInfoMutation,
   useGetStatsQuery,
   useGetProductsQuery,
