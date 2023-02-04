@@ -7,13 +7,19 @@ import { SpacedSubTypography } from "../components";
 import { LoginDialog } from "../components/auth";
 import { CartItem } from "../interfaces";
 import { PageLayout } from "../layouts";
-import { useAppSelector } from "../utils/hooks";
+import { useAppDispatch, useAppSelector } from "../utils/hooks";
 import useAuth from "../utils/hooks/useAuth";
+import { removeFromCart } from "../redux/slices";
 
 export default function CartPage() {
+  const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
   const cartItems = useAppSelector((state) => state.user.cart) as CartItem[];
   const [amount, setAmount] = useState<number>(0);
+
+  const handleRemove = (id: string, size: string) => {
+    dispatch(removeFromCart({ id, size }));
+  };
 
   useEffect(() => {
     let newAmount = 0;
@@ -29,22 +35,24 @@ export default function CartPage() {
       <SpacedSubTypography>cart</SpacedSubTypography>
       <Grid container spacing={2}>
         <Grid item xs={8}>
-          {cartItems.map((item) => {
-            console.log(item.image);
+          {cartItems.map((item, index) => {
             return (
-              <Card key={item.id}>
+              <Card key={`${index}-${item.id}`} sx={{ mb: 2 }}>
                 <CardContent sx={{ display: "flex" }}>
                   <Image src={item.image} alt={item.title} width={140} height={140} />
                   <Box alignSelf={"center"}>
                     <Box mx={2}>
-                      <Link href={`products/${item.id}`}>
-                        <Typography>{item.title}</Typography>
-                      </Link>
+                      <Typography>{item.title}</Typography>
                       <Typography variant={"body2"}>Size: {item.size}</Typography>
                       <Typography variant={"body2"}>{item.quantity} selected</Typography>
                       <Typography variant={"body2"}>${item.price}</Typography>
                     </Box>
-                    <Button sx={{ mx: 1 }}>REMOVE</Button>
+                    <Link href={`products/[id]`} as={`products/${item.id}`}>
+                      <Button sx={{ mx: 1 }}>EDIT</Button>
+                    </Link>
+                    <Button onClick={() => handleRemove(item.id, item.size)} sx={{ mx: 1 }}>
+                      REMOVE
+                    </Button>
                   </Box>
                 </CardContent>
               </Card>

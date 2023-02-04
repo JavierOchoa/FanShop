@@ -6,3 +6,8 @@ export interface CartItem {
   size: string;
   price: number;
 }
+
+export interface CartItemToRemove {
+  id: string;
+  size: string;
+}
