@@ -10,13 +10,14 @@ import {
 import {
   DetailedProduct,
   ProductPost,
-  APIResponse,
   UserPost,
   StatsResponse,
   APIProductResponse,
 } from "../../interfaces/admin";
 import { APIProductInformation } from "../../interfaces/products/ProductInformation";
+import { APIResponse } from "../../interfaces";
 import { RootState } from "../store";
+import { UpdateAccount } from "../../interfaces/user";
 
 export const api = createApi({
   reducerPath: "api",
@@ -51,12 +52,12 @@ export const api = createApi({
       query: () => "/user/info",
     }),
     //Admin Enpoints
-    //Stats
+    //Admin//Stats
     getStats: builder.query<StatsResponse, void>({
       query: () => "/admin/stats",
       providesTags: ["Stats"],
     }),
-    //Products
+    //Admin//Products
     getProducts: builder.query<APIProductResponse, void>({
       query: () => `/admin/products`,
       providesTags: ["Products"],
@@ -91,7 +92,7 @@ export const api = createApi({
       }),
       invalidatesTags: ["Products", "Product"],
     }),
-    //Users
+    //Admin//Users
     getUsers: builder.query<User[], void>({
       query: () => "/admin/users",
       providesTags: ["Users"],
@@ -144,6 +145,14 @@ export const api = createApi({
     getProductInformation: builder.query<APIProductInformation, string>({
       query: (productId?) => `/products/${productId}`,
     }),
+    //User
+    updateUser: builder.mutation<APIResponse, UpdateAccount>({
+      query: (informationToUpdate) => ({
+        url: `/user/account/update`,
+        method: "POST",
+        body: informationToUpdate,
+      }),
+    }),
   }),
 });
 
@@ -167,4 +176,5 @@ export const {
   useRemoveUserMutation,
   useGetProductsListQuery,
   useGetProductInformationQuery,
+  useUpdateUserMutation,
 } = api;

@@ -101,7 +101,7 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
 
       if (type === "signup") {
         const credentials = {
-          name: inputName.current!.value,
+          fullName: inputName.current!.value,
           email: inputEmail.current!.value,
           password: inputPassword.current!.value,
         };
