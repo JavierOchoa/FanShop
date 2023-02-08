@@ -7,7 +7,7 @@ import { PageLayout } from "../layouts";
 import { useUpdateUserMutation } from "../redux/services";
 import { useAppSelector } from "../utils/hooks";
 
-type EditType = "fullName" | "email" | "password";
+type EditType = "fullName" | "email" | "password" | "all";
 
 export default function Account() {
   const userInfo: UserInfo = useAppSelector((state) => state.auth.user);
@@ -54,6 +54,12 @@ export default function Account() {
       setEditEmail(false);
       setEditPassword(!editPassword);
     }
+    if (type === "all") {
+      handleClear();
+      setEditName(false);
+      setEditEmail(false);
+      setEditPassword(false);
+    }
   };
 
   const handleStartDeactivation = () => {
@@ -91,6 +97,7 @@ export default function Account() {
     if (!data.successful) {
       setErrorMessage(data.message);
     }
+    handleEditFields("all");
     return;
   };
 

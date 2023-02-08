@@ -94,7 +94,8 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
           if (p) {
             router.push(`${p}`);
           } else {
-            router.push("/");
+            // router.push("/");
+            router.reload();
           }
         }
       }
@@ -116,7 +117,8 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
           if (p) {
             router.push(`${p}`);
           } else {
-            router.push("/");
+            // router.push("/");
+            router.reload();
           }
         }
       }

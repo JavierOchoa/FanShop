@@ -39,7 +39,7 @@ export class Product {
   @Column("text", { array: true, default: [] })
   tags: string[];
 
-  @ManyToOne(() => User, (user) => user.product)
+  @ManyToOne(() => User, (user) => user.products)
   user: User;
 
   @OneToMany(() => ProductImage, (productImage) => productImage.product, {

@@ -6,6 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Order } from "./Order";
 import { Product } from "./Product";
 
 @Entity()
@@ -29,7 +30,10 @@ export class User {
   roles: string[];
 
   @OneToMany(() => Product, (product) => product.user)
-  product: Product;
+  products: Product[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
