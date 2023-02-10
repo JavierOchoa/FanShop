@@ -1,3 +1,5 @@
+import { APIResponse } from "..";
+
 export interface CartItem {
   id: string;
   title: string;
@@ -10,4 +12,8 @@ export interface CartItem {
 export interface CartItemToRemove {
   id: string;
   size: string;
+}
+
+export interface NewOrder extends APIResponse {
+  data?: string;
 }

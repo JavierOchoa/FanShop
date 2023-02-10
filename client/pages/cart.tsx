@@ -5,16 +5,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SpacedSubTypography } from "../components";
 import { LoginDialog } from "../components/auth";
-import { CartItem } from "../interfaces";
 import { PageLayout } from "../layouts";
-import { useAppDispatch, useAppSelector } from "../utils/hooks";
+import { useAppDispatch } from "../utils/hooks";
 import useAuth from "../utils/hooks/useAuth";
+import useUser from "../utils/hooks/useUser";
 import { removeFromCart } from "../redux/slices";
 
 export default function CartPage() {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
-  const cartItems = useAppSelector((state) => state.user.cart) as CartItem[];
+  // const cartItems = useAppSelector((state) => state.user.cart) as CartItem[];
+  const { cartItems, createOrder, loadingNewOrder } = useUser();
   const [amount, setAmount] = useState<number>(0);
 
   const handleRemove = (id: string, size: string) => {
@@ -77,9 +78,9 @@ export default function CartPage() {
               )}
               {isAuthenticated && (
                 <LoadingButton
-                  // onClick={handleClick}
+                  onClick={createOrder}
                   type={"submit"}
-                  // loading={loginRequestLoading}
+                  loading={loadingNewOrder}
                   loadingIndicator="Checking out..."
                   variant="contained"
                   sx={{ my: 4 }}

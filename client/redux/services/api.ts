@@ -3,6 +3,7 @@ import {
   AuthResponse,
   ListedProducts,
   LoginRequest,
+  NewOrder,
   SignUpRequest,
   User,
   UserInfo,
@@ -13,7 +14,7 @@ import {
   UserPost,
   StatsResponse,
   APIProductResponse,
-} from "../../interfaces/admin";
+} from "../../interfaces";
 import { APIProductInformation } from "../../interfaces/products/ProductInformation";
 import { APIResponse } from "../../interfaces";
 import { RootState } from "../store";
@@ -153,6 +154,10 @@ export const api = createApi({
         body: informationToUpdate,
       }),
     }),
+    //Orders
+    createOrder: builder.mutation<NewOrder, void>({
+      query: () => "/order/create",
+    }),
   }),
 });
 
@@ -177,4 +182,5 @@ export const {
   useGetProductsListQuery,
   useGetProductInformationQuery,
   useUpdateUserMutation,
+  useCreateOrderMutation,
 } = api;

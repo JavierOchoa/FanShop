@@ -1,4 +1,4 @@
-import { Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Product } from "./Product";
 import { User } from "./User";
 
@@ -6,6 +6,9 @@ import { User } from "./User";
 export class Order {
   @PrimaryGeneratedColumn("uuid")
   id: string;
+
+  @Column("text", { default: "incomplete" })
+  status: "complete" | "incomplete";
 
   @ManyToOne(() => User, (user) => user.orders)
   user: User;
