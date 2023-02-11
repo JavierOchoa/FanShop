@@ -48,7 +48,7 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
     if (!toValidate.email) {
       objErr["email"] = "No email";
     } else {
-      if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(toValidate.email)) {
+      if (!/^[\w-]+@([\w-]+\.)+[\w-]{2,4}$/g.test(toValidate.email)) {
         objErr["email"] = "Invalid email";
       }
     }
@@ -92,9 +92,8 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
         } else {
           const { p } = router.query;
           if (p) {
-            router.push(`${p}`);
+            await router.push(`${p}`);
           } else {
-            // router.push("/");
             router.reload();
           }
         }
@@ -115,9 +114,8 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
         } else {
           const { p } = router.query;
           if (p) {
-            router.push(`${p}`);
+            await router.push(`${p}`);
           } else {
-            // router.push("/");
             router.reload();
           }
         }
@@ -135,7 +133,7 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
           id="name"
           label="Name"
           inputRef={inputName}
-          error={error.name ? true : false}
+          error={!!error.name}
           sx={{ mt: 1 }}
         />
       )}
@@ -144,7 +142,7 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
         id="email"
         label="Email"
         inputRef={inputEmail}
-        error={error.email ? true : false}
+        error={!!error.email}
         sx={{ mt: 1 }}
       />
       <FormControl variant="outlined">
@@ -167,7 +165,7 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
           }
           label="Password"
           inputRef={inputPassword}
-          error={error.password ? true : false}
+          error={!!error.password}
           sx={{ mt: 1 }}
         />
       </FormControl>

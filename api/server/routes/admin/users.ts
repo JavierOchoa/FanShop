@@ -63,7 +63,7 @@ usersAdminRouter.post(
     }
     if (
       !/^[_A-z0-9]*((-|\s)*[_A-z0-9])*$/g.test(fullName) ||
-      !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(email) ||
+      !/^[\w-]+@([\w-]+\.)+[\w-]{2,4}$/g.test(email) ||
       roles.length < 1
     ) {
       res.send(routeResponse(false, "Missing information or Wrong data."));
@@ -123,7 +123,7 @@ usersAdminRouter.patch(
         return;
       }
       userOnDb.isActive = true;
-      userRepository.save(userOnDb);
+      await userRepository.save(userOnDb);
       res.send(routeResponse(true, `User with ID: ${id} is now active`));
     } catch (err) {
       res.send(routeResponse(false, (err as Error).message));
@@ -148,7 +148,7 @@ usersAdminRouter.patch(
         return;
       }
       userOnDb.isActive = false;
-      userRepository.save(userOnDb);
+      await userRepository.save(userOnDb);
       res.send(routeResponse(true, `User with ID: ${id} is now inactive`));
     } catch (err) {
       res.send(routeResponse(false, (err as Error).message));

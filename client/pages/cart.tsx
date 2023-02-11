@@ -8,14 +8,13 @@ import { LoginDialog } from "../components/auth";
 import { PageLayout } from "../layouts";
 import { useAppDispatch } from "../utils/hooks";
 import useAuth from "../utils/hooks/useAuth";
-import useUser from "../utils/hooks/useUser";
+import useCheckout from "../utils/hooks/useCheckout";
 import { removeFromCart } from "../redux/slices";
 
 export default function CartPage() {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
-  // const cartItems = useAppSelector((state) => state.user.cart) as CartItem[];
-  const { cartItems, createOrder, loadingNewOrder } = useUser();
+  const { cartItems, createOrder, loadingNewOrder } = useCheckout();
   const [amount, setAmount] = useState<number>(0);
 
   const handleRemove = (id: string, size: string) => {

@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
+  AddressBody,
+  AddressesResponse,
   AuthResponse,
   ListedProducts,
   LoginRequest,
@@ -18,7 +20,7 @@ import {
 import { APIProductInformation } from "../../interfaces/products/ProductInformation";
 import { APIResponse } from "../../interfaces";
 import { RootState } from "../store";
-import { UpdateAccount } from "../../interfaces/user";
+import { UpdateAccount } from "../../interfaces";
 
 export const api = createApi({
   reducerPath: "api",
@@ -32,7 +34,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Products", "Users", "UserInfo", "Product", "Stats"],
+  tagTypes: ["Products", "Users", "UserInfo", "Product", "Stats", "AddressesList"],
   endpoints: (builder) => ({
     //Auth Endpoints
     login: builder.mutation<AuthResponse, LoginRequest>({
@@ -154,6 +156,33 @@ export const api = createApi({
         body: informationToUpdate,
       }),
     }),
+    getUserAddresses: builder.query<AddressesResponse, void>({
+      query: () => "/user/addresses",
+      providesTags: ["AddressesList"],
+    }),
+    createAddress: builder.mutation<APIResponse, AddressBody>({
+      query: (addressBody) => ({
+        url: `/user/account/address/new`,
+        method: "POST",
+        body: addressBody,
+      }),
+      invalidatesTags: ["AddressesList"],
+    }),
+    deleteAddress: builder.mutation<APIResponse, string>({
+      query: (id) => ({
+        url: `/user/account/address/delete/${id}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["AddressesList"],
+    }),
+    updateAddress: builder.mutation<APIResponse, AddressBody>({
+      query: (addressBody) => ({
+        url: `/user/account/address/edit`,
+        method: "POST",
+        body: addressBody,
+      }),
+      invalidatesTags: ["AddressesList"],
+    }),
     //Orders
     createOrder: builder.mutation<NewOrder, void>({
       query: () => "/order/create",
@@ -183,4 +212,8 @@ export const {
   useGetProductInformationQuery,
   useUpdateUserMutation,
   useCreateOrderMutation,
+  useGetUserAddressesQuery,
+  useCreateAddressMutation,
+  useDeleteAddressMutation,
+  useUpdateAddressMutation,
 } = api;

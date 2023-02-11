@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { Order } from "./Order";
 import { Product } from "./Product";
+import { Address } from "./Address";
 
 @Entity()
 export class User {
@@ -34,6 +35,9 @@ export class User {
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
+
+  @OneToMany(() => Address, (address) => address.user)
+  addresses: Address[];
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
