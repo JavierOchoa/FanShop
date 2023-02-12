@@ -2,7 +2,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddressBody,
   AddressesResponse,
+  APIOrderResponse,
   AuthResponse,
+  CartItem,
   ListedProducts,
   LoginRequest,
   NewOrder,
@@ -184,8 +186,15 @@ export const api = createApi({
       invalidatesTags: ["AddressesList"],
     }),
     //Orders
-    createOrder: builder.mutation<NewOrder, void>({
-      query: () => "/order/create",
+    createOrder: builder.mutation<NewOrder, CartItem[]>({
+      query: (cartItems) => ({
+        url: `/order/create`,
+        method: "POST",
+        body: { cartItems },
+      }),
+    }),
+    getOrder: builder.query<APIOrderResponse, string>({
+      query: (orderId) => `/order/${orderId}`,
     }),
   }),
 });
@@ -216,4 +225,5 @@ export const {
   useCreateAddressMutation,
   useDeleteAddressMutation,
   useUpdateAddressMutation,
+  useGetOrderQuery,
 } = api;

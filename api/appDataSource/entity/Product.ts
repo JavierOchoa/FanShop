@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { User } from "./User";
 import { ProductImage } from "./ProductImage";
+import { OrderedProduct } from "./OrderedProduct";
 
 @Entity()
 export class Product {
@@ -46,6 +47,9 @@ export class Product {
     cascade: true,
   })
   images: ProductImage[];
+
+  @OneToMany(() => OrderedProduct, (orderedProduct) => orderedProduct.product)
+  ordered: OrderedProduct[];
 
   @BeforeInsert()
   checkSlugInsert() {

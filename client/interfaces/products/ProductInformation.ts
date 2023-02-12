@@ -7,7 +7,7 @@ export interface APIProductInformation extends APIResponse {
   data: ProductInformation;
 }
 
-export interface ProductInformation {
+export interface CleanProduct {
   id: string;
   title: string;
   price: number;
@@ -17,5 +17,8 @@ export interface ProductInformation {
   sizes: string[];
   gender: string;
   tags: string[];
+}
+
+export interface ProductInformation extends CleanProduct {
   images: ImageInProduct[];
 }

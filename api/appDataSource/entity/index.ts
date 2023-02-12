@@ -3,3 +3,4 @@ export * from "./User";
 export * from "./ProductImage";
 export * from "./Order";
 export * from "./Address";
+export * from "./OrderedProduct";

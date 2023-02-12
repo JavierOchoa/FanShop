@@ -1,14 +1,21 @@
 import { AddressBody } from "../../interfaces";
 import { FC, PropsWithChildren, useState } from "react";
-import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Radio, Typography } from "@mui/material";
 import useCheckout from "../../utils/hooks/useCheckout";
 
 interface Props {
   address: AddressBody;
   editFunction: (address: AddressBody) => void;
+  selectFunction: (address: AddressBody) => void;
+  selectedAddress: string;
 }
 
-export const AddressCard: FC<PropsWithChildren<Props>> = ({ address, editFunction }) => {
+export const AddressCard: FC<PropsWithChildren<Props>> = ({
+  address,
+  editFunction,
+  selectFunction,
+  selectedAddress,
+}) => {
   const { deleteAddress } = useCheckout();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const handleEdit = () => {
@@ -17,9 +24,22 @@ export const AddressCard: FC<PropsWithChildren<Props>> = ({ address, editFunctio
   const handleRemove = () => {
     deleteAddress(address.id!).catch((err) => setErrorMessage(err.message));
   };
+
+  const handleChange = () => {
+    selectFunction(address);
+  };
+
   return (
-    <Card>
+    <Card sx={{ mb: 2 }}>
       <CardContent sx={{ display: "flex" }}>
+        <Radio
+          disableRipple
+          checked={selectedAddress === address.id}
+          onChange={handleChange}
+          value="a"
+          name="radio-buttons"
+          inputProps={{ "aria-label": "A" }}
+        />
         <Box alignSelf={"center"}>
           <Box mx={2}>
             <Typography>{address.fullName}</Typography>

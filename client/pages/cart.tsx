@@ -1,5 +1,15 @@
 import { LoadingButton } from "@mui/lab";
-import { Box, Button, Card, CardContent, Grid, Paper, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -14,12 +24,17 @@ import { removeFromCart } from "../redux/slices";
 export default function CartPage() {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAuth();
-  const { cartItems, createOrder, loadingNewOrder } = useCheckout();
+  const { cartItems, createOrder, loadingNewOrder, checkoutError } = useCheckout();
   const [amount, setAmount] = useState<number>(0);
 
   const handleRemove = (id: string, size: string) => {
     dispatch(removeFromCart({ id, size }));
   };
+
+  // const handleCreateOrder = async () => {
+  //   const idArrays = cartItems.map((item) => item.id);
+  //   await createOrder(idArrays);
+  // };
 
   useEffect(() => {
     let newAmount = 0;
@@ -28,10 +43,7 @@ export default function CartPage() {
   }, [cartItems]);
 
   return (
-    <PageLayout
-      title={"Cart"}
-      pageDescription={"Cart page. Review items before proceeding with the purchase"}
-    >
+    <PageLayout title={"Cart"} pageDescription={"Review items before proceeding with the purchase"}>
       <SpacedSubTypography>cart</SpacedSubTypography>
       <Grid container spacing={2}>
         <Grid item xs={8}>
@@ -80,7 +92,7 @@ export default function CartPage() {
                   onClick={createOrder}
                   type={"submit"}
                   loading={loadingNewOrder}
-                  loadingIndicator="Checking out..."
+                  loadingIndicator="Processing..."
                   variant="contained"
                   sx={{ my: 4 }}
                 >
@@ -88,6 +100,11 @@ export default function CartPage() {
                 </LoadingButton>
               )}
             </Box>
+            {checkoutError && (
+              <Alert variant="filled" severity="error">
+                {checkoutError}
+              </Alert>
+            )}
           </Paper>
         </Grid>
       </Grid>

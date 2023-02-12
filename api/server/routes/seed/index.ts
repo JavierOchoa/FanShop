@@ -3,18 +3,23 @@ import { initialData } from "./seed-data";
 import { productImageRepository, productRepository, userRepository } from "../../../appDataSource";
 import { User } from "../../../appDataSource/entity";
 import { SeedProduct, SeedUser } from "../../../interfaces";
-import passport from "passport";
+// import passport from "passport";
 import { routeResponse } from "..";
 
 export const seedRouter = Router();
 
-seedRouter.get("/", passport.authenticate("jwt", { session: false }), async (req, res) => {
+seedRouter.get("/", async (req, res) => {
   try {
-    const user = req.user as User;
+    // const user = req.user as User;
 
-    if (!user.roles.includes("admin")) {
-      res.status(401).send(routeResponse(false, "Unauthorized"));
-      return;
+    // if (!user.roles.includes("admin")) {
+    //   res.status(401).send(routeResponse(false, "Unauthorized"));
+    //   return;
+
+    const { seedKey } = req.body;
+
+    if (seedKey !== process.env.SEED_KEY) {
+      return res.status(401).send(routeResponse(false, "Unauthorized"));
     }
 
     await productRepository.createQueryBuilder("product").delete().where({}).execute();

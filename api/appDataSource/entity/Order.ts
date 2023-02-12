@@ -1,6 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Product } from "./Product";
 import { User } from "./User";
+import { Address } from "./Address";
+import { OrderedProduct } from "./OrderedProduct";
 
 @Entity()
 export class Order {
@@ -10,10 +11,16 @@ export class Order {
   @Column("text", { default: "incomplete" })
   status: "complete" | "incomplete";
 
+  @Column("float", { default: 0 })
+  total: number;
+
+  @ManyToOne(() => Address, (address) => address.orders)
+  address: Address;
+
   @ManyToOne(() => User, (user) => user.orders)
   user: User;
 
-  @ManyToMany(() => Product)
+  @ManyToMany(() => OrderedProduct)
   @JoinTable()
-  products: Product[];
+  products: OrderedProduct[];
 }
