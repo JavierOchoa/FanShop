@@ -37,8 +37,10 @@ export default function CartPage() {
   // };
 
   useEffect(() => {
-    let newAmount = 0;
-    cartItems.forEach((item) => (newAmount = +item.price));
+    let newAmount = cartItems.reduce((acc, value) => acc + value.price, 0);
+    // const total = products.reduce((acc, value) => acc + value.price, 0);
+    // const total = cartItems.reduce((acc, value) => acc + value.price, 0);
+    // cartItems.forEach((item) => (newAmount = +item.price));
     setAmount(newAmount);
   }, [cartItems]);
 

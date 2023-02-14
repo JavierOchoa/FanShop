@@ -66,6 +66,9 @@ const CheckoutPage: FC<PropsWithChildren<Props>> = ({ countryList }) => {
     }
   }, [userAddresses]);
 
+  console.log(selectedAddress.id! === undefined, selectedAddress.id!);
+  console.log(openForm, "openForm");
+
   return (
     <CheckoutLayout
       title={"Checkout Page"}
@@ -150,9 +153,13 @@ const CheckoutPage: FC<PropsWithChildren<Props>> = ({ countryList }) => {
             <Paper sx={{ p: 2 }}>
               <Typography fontSize={"x-large"}>Pay Your Order</Typography>
               <Typography fontSize={"large"}>Total: ${orderInformation?.data.total}</Typography>
-              <Button sx={{ mt: 4 }} variant={"contained"}>
-                Pay with PAYPAL
-              </Button>
+              {activeStep === steps.length - 1 && (
+                <Box display={"flex"} justifyContent={"center"}>
+                  <Button sx={{ mt: 4 }} variant={"contained"}>
+                    Pay with PAYPAL
+                  </Button>
+                </Box>
+              )}
             </Paper>
           </Grid>
         </Grid>
@@ -162,7 +169,7 @@ const CheckoutPage: FC<PropsWithChildren<Props>> = ({ countryList }) => {
           </Button>
           <Box sx={{ flex: "1 1 auto" }} />
           <Button
-            disabled={selectedAddress.id! === "" || openForm}
+            disabled={selectedAddress.id! === undefined || openForm}
             onClick={handleNext}
             sx={{ visibility: activeStep === steps.length - 1 ? "hidden" : "visible" }}
           >
