@@ -3,13 +3,18 @@ import { User } from "./User";
 import { Address } from "./Address";
 import { OrderedProduct } from "./OrderedProduct";
 
+type OrderStatus = "completed" | "incomplete" | "in-progress";
+
 @Entity()
 export class Order {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column("text", { default: "incomplete" })
-  status: "complete" | "incomplete";
+  status: OrderStatus;
+
+  @Column("text", { default: "pending" })
+  paypalId: string;
 
   @Column("float", { default: 0 })
   total: number;

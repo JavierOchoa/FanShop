@@ -34,6 +34,7 @@ interface Props {
   openStatus: boolean;
   dialogType: ModalType;
 }
+
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -147,7 +148,7 @@ export const UserDialog: FC<PropsWithChildren<Props>> = ({ userId, openStatus, d
     }
   };
   const handleStatus = async () => {
-    user.isActive ? deactivateUsers([user.id!]) : activateUsers([user.id!]);
+    user.isActive ? await deactivateUsers([user.id!]) : await activateUsers([user.id!]);
   };
   const handleRoleChange = (event: SelectChangeEvent<string[]>) => {
     const {

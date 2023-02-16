@@ -6,9 +6,9 @@ export const AdminDrawer: FC = () => {
   const router = useRouter();
   const handleListItem = (pageName: string | undefined) => {
     if (pageName) {
-      router.push(`/admin/${pageName.toLowerCase()}`);
+      router.push(`/admin/${pageName.toLowerCase()}`).catch((e) => console.log(e));
     } else {
-      router.push(`/admin/`);
+      router.push(`/admin/`).catch((e) => console.log(e));
     }
   };
   return (

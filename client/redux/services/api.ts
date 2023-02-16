@@ -3,8 +3,11 @@ import {
   AddressBody,
   AddressesResponse,
   APIOrderResponse,
+  APIOrderStatusResponse,
   AuthResponse,
   CartItem,
+  CreatePaypalOrder,
+  CreatePaypalOrderResponse,
   ListedProducts,
   LoginRequest,
   NewOrder,
@@ -36,7 +39,16 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Products", "Users", "UserInfo", "Product", "Stats", "AddressesList"],
+  tagTypes: [
+    "Products",
+    "Users",
+    "UserInfo",
+    "Product",
+    "Stats",
+    "AddressesList",
+    "OrderInformation",
+    "OrderStatus",
+  ],
   endpoints: (builder) => ({
     //Auth Endpoints
     login: builder.mutation<AuthResponse, LoginRequest>({
@@ -56,7 +68,7 @@ export const api = createApi({
     getUserInfo: builder.mutation<UserInfo, void>({
       query: () => "/user/info",
     }),
-    //Admin Enpoints
+    //Admin Endpoints
     //Admin//Stats
     getStats: builder.query<StatsResponse, void>({
       query: () => "/admin/stats",
@@ -192,9 +204,22 @@ export const api = createApi({
         method: "POST",
         body: { cartItems },
       }),
+      invalidatesTags: ["OrderInformation"],
     }),
     getOrder: builder.query<APIOrderResponse, string>({
       query: (orderId) => `/order/${orderId}`,
+      providesTags: ["OrderInformation"],
+    }),
+    getOrderStatus: builder.query<APIOrderStatusResponse, string>({
+      query: (orderId) => `/order/status/${orderId}`,
+      providesTags: ["OrderStatus"],
+    }),
+    payWithPaypal: builder.mutation<CreatePaypalOrderResponse, CreatePaypalOrder>({
+      query: (body) => ({
+        url: `/order/paypal/create`,
+        method: "POST",
+        body,
+      }),
     }),
   }),
 });
@@ -226,4 +251,6 @@ export const {
   useDeleteAddressMutation,
   useUpdateAddressMutation,
   useGetOrderQuery,
+  useGetOrderStatusQuery,
+  usePayWithPaypalMutation,
 } = api;

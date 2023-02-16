@@ -41,7 +41,7 @@ export const userSlice = createSlice({
       }
     },
     removeFromCart: (state, { payload }: PayloadAction<CartItemToRemove>) => {
-      const newCart = state.cart.filter((item) => {
+      state.cart = state.cart.filter((item) => {
         for (let key in payload) {
           if (
             item[key as keyof CartItem] === undefined ||
@@ -52,11 +52,13 @@ export const userSlice = createSlice({
         }
         return false;
       });
-      state.cart = newCart;
+    },
+    cleanCart: (state) => {
+      state.cart = [];
     },
   },
 });
 
-export const { addToCart, removeFromCart } = userSlice.actions;
+export const { addToCart, removeFromCart, cleanCart } = userSlice.actions;
 
 export default userSlice.reducer;

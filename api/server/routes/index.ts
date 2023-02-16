@@ -4,7 +4,7 @@ import { userRouter } from "./user";
 import { adminRouter } from "./admin";
 import { authRouter } from "./auth";
 import { productRouter } from "./products";
-import { orderRouter } from "./order";
+import { orderRouter } from "./orders";
 
 export const routes = Router();
 

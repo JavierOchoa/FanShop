@@ -1,5 +1,6 @@
 import { Checkbox, TableCell, TableHead, TableRow } from "@mui/material";
 import { TableHeadCell } from "../../../interfaces";
+import React from "react";
 
 interface EnhancedTableProps {
   numSelected: number;

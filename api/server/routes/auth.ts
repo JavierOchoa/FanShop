@@ -1,5 +1,5 @@
 import { Router } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { userRepository } from "../../appDataSource";
 import { User } from "../../appDataSource/entity";
 import jwt from "jsonwebtoken";

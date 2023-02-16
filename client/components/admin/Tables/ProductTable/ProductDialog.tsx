@@ -133,7 +133,7 @@ export const ProductDialog: FC<PropsWithChildren<Props>> = ({
           ...error,
           [fieldToValidate]: {
             status: true,
-            message: "This field is requiered. Can't contain special characters",
+            message: "This field is required. Can't contain special characters",
           },
         });
         setDisabledSaveStatus(true);

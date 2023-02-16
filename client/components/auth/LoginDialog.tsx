@@ -1,11 +1,11 @@
 import { Login } from "@mui/icons-material";
-import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
+import { Box, Button, Dialog, DialogContent } from "@mui/material";
 import { useState } from "react";
 import { LoginForm } from "./";
 
 export const LoginDialog = () => {
   const [openStatus, setOpenStatus] = useState<boolean>(false);
-  const [formType, setFormType] = useState<"login" | "signup">("login");
+  const [formType] = useState<"login" | "signup">("login");
   const handleOpen = () => {
     setOpenStatus(true);
   };

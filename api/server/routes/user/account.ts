@@ -3,7 +3,7 @@ import passport from "passport";
 import { Address, User } from "../../../appDataSource/entity";
 import { routeResponse } from "..";
 import { addressRepository, userRepository } from "../../../appDataSource";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export const accountRouter = Router();
 

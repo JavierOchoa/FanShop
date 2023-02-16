@@ -28,7 +28,7 @@ export const CheckoutLayout: FC<PropsWithChildren<Props>> = ({
     );
   }
   if (!user) {
-    router.push(`/`);
+    router.push(`/`).catch((e) => console.log(e));
     return <></>;
   }
   return (

@@ -7,16 +7,15 @@ import { ProductImageCarousel } from "../../components/ProductImageCarousel";
 import { CartItem } from "../../interfaces";
 import { PageLayout } from "../../layouts";
 import { useGetProductInformationQuery } from "../../redux/services";
-import { addToCart } from "../../redux/slices";
-import { useAppDispatch } from "../../utils/hooks";
+import useCheckout from "../../utils/hooks/useCheckout";
 
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function ProductPage() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const productId = router.query.id as string;
   const { data: productInformation } = useGetProductInformationQuery(productId);
+  const { dispatchAddToCart } = useCheckout();
   const [buttonStatus, setButtonStatus] = useState<boolean>(true);
   const [body, setBody] = useState<CartItem>({
     id: "",
@@ -54,7 +53,7 @@ export default function ProductPage() {
   };
 
   const handleAddToCart = () => {
-    dispatch(addToCart(body));
+    dispatchAddToCart(body);
   };
 
   return (
@@ -79,7 +78,7 @@ export default function ProductPage() {
                 <Button
                   aria-label={"decrease"}
                   id={"decrease"}
-                  disabled={body.quantity <= 1 ? true : false}
+                  disabled={body.quantity <= 1}
                   onClick={handleBodyChange}
                 >
                   <Remove fontSize="small" />

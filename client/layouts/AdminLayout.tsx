@@ -30,7 +30,7 @@ export const AdminLayout: FC<PropsWithChildren<Props>> = ({
     );
   }
   if (!user) {
-    router.push(`/admin/login?p=${router.pathname}`);
+    router.push(`/admin/login?p=${router.pathname}`).catch((e) => console.log(e));
     return <></>;
   }
   return (
