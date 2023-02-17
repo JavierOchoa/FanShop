@@ -15,13 +15,21 @@ export interface ProductElement {
   product: CleanProduct;
 }
 
-export interface OrderInformation {
+export interface OrderResume {
   id: string;
   status: OrderStatus;
+  paypalId: string;
   total: number;
-  user: User;
   products: ProductElement[];
   address: AddressBody;
+}
+
+export interface OrderInformation extends OrderResume {
+  user: User;
+}
+
+export interface APIOrderHistoryResponse extends APIResponse {
+  data: OrderResume[];
 }
 
 export interface APIOrderStatusResponse extends APIResponse {

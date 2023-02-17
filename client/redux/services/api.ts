@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   AddressBody,
   AddressesResponse,
+  APIOrderHistoryResponse,
   APIOrderResponse,
   APIOrderStatusResponse,
   AuthResponse,
@@ -210,6 +211,9 @@ export const api = createApi({
       query: (orderId) => `/order/${orderId}`,
       providesTags: ["OrderInformation"],
     }),
+    getOrderHistory: builder.query<APIOrderHistoryResponse, void>({
+      query: () => "/user/purchases",
+    }),
     getOrderStatus: builder.query<APIOrderStatusResponse, string>({
       query: (orderId) => `/order/status/${orderId}`,
       providesTags: ["OrderStatus"],
@@ -253,4 +257,5 @@ export const {
   useGetOrderQuery,
   useGetOrderStatusQuery,
   usePayWithPaypalMutation,
+  useGetOrderHistoryQuery,
 } = api;

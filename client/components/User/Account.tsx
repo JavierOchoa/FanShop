@@ -96,6 +96,7 @@ export const Account = () => {
     handleEditFields("all");
     return;
   };
+
   return (
     <Box display={"flex"} flexDirection={"column"}>
       <Box display={"flex"} alignItems={"center"} mb={4}>
