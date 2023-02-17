@@ -11,7 +11,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import { createRef, FC, PropsWithChildren, useState } from "react";
+import { createRef, FC, FormEvent, PropsWithChildren, useState } from "react";
 import useAuth from "../../utils/hooks/useAuth";
 
 interface InfoToValidate {
@@ -72,7 +72,8 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
     return objErr;
   };
 
-  const handleClick = async () => {
+  const handleClick = async (e?: FormEvent<HTMLFormElement>) => {
+    if (e) e.preventDefault();
     const name = inputName.current?.value;
     const email = inputEmail.current?.value;
     const password = inputPassword.current?.value;
@@ -123,67 +124,68 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
     }
   };
   return (
-    <FormControl>
-      <FormLabel sx={{ m: 2, alignSelf: "center" }}>
-        {type === "login" ? "Login" : "Sign Up"}
-      </FormLabel>
-      {type === "signup" && (
+    <form onSubmit={handleClick}>
+      <FormControl>
+        <FormLabel sx={{ m: 2, alignSelf: "center" }}>
+          {type === "login" ? "Login" : "Sign Up"}
+        </FormLabel>
+        {type === "signup" && (
+          <TextField
+            fullWidth
+            id="name"
+            label="Name"
+            inputRef={inputName}
+            error={!!error.name}
+            sx={{ mt: 1 }}
+          />
+        )}
         <TextField
           fullWidth
-          id="name"
-          label="Name"
-          inputRef={inputName}
-          error={!!error.name}
+          id="email"
+          label="Email"
+          inputRef={inputEmail}
+          error={!!error.email}
           sx={{ mt: 1 }}
         />
-      )}
-      <TextField
-        fullWidth
-        id="email"
-        label="Email"
-        inputRef={inputEmail}
-        error={!!error.email}
-        sx={{ mt: 1 }}
-      />
-      <FormControl variant="outlined">
-        <InputLabel htmlFor="password" sx={{ pt: 1 }}>
-          Password
-        </InputLabel>
-        <OutlinedInput
-          id="password"
-          type={showPassword ? "text" : "password"}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          }
-          label="Password"
-          inputRef={inputPassword}
-          error={!!error.password}
-          sx={{ mt: 1 }}
-        />
+        <FormControl variant="outlined">
+          <InputLabel htmlFor="password" sx={{ pt: 1 }}>
+            Password
+          </InputLabel>
+          <OutlinedInput
+            id="password"
+            type={showPassword ? "text" : "password"}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label="Password"
+            inputRef={inputPassword}
+            error={!!error.password}
+            sx={{ mt: 1 }}
+          />
+          {!admin && (
+            <Button sx={{ my: 2 }} onClick={handleType}>
+              {type === "login" ? "Create account" : "Already have an account?"}
+            </Button>
+          )}
+          <LoadingButton
+            type={"submit"}
+            loading={loginRequestLoading || signUpRequestLoading}
+            loadingIndicator="Loading..."
+            variant="contained"
+            sx={{ mt: 2 }}
+          >
+            {type === "login" ? "Login" : "Sign up"}
+          </LoadingButton>
+        </FormControl>
       </FormControl>
-      {!admin && (
-        <Button sx={{ my: 2 }} onClick={handleType}>
-          {type === "login" ? "Create account" : "Already have an account?"}
-        </Button>
-      )}
-      <LoadingButton
-        onClick={handleClick}
-        type={"submit"}
-        loading={loginRequestLoading || signUpRequestLoading}
-        loadingIndicator="Loading..."
-        variant="contained"
-        sx={{ mt: 2 }}
-      >
-        {type === "login" ? "Login" : "Sign up"}
-      </LoadingButton>
-    </FormControl>
+    </form>
   );
 };
