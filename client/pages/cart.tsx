@@ -18,18 +18,25 @@ import { LoginDialog } from "../components/auth";
 import { PageLayout } from "../layouts";
 import useAuth from "../utils/hooks/useAuth";
 import useCheckout from "../utils/hooks/useCheckout";
+import { CartItem } from "../interfaces";
 
 export default function CartPage() {
   const { isAuthenticated } = useAuth();
-  const { cartItems, createOrder, loadingNewOrder, checkoutError, dispatchRemoveFromCart } =
-    useCheckout();
+  const {
+    cartItems: itemsInCart,
+    createOrder,
+    loadingNewOrder,
+    checkoutError,
+    dispatchRemoveFromCart,
+  } = useCheckout();
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [amount, setAmount] = useState<number>(0);
 
   useEffect(() => {
-    let newAmount = cartItems.reduce((acc, value) => acc + value.price * value.quantity, 0);
-
+    setCartItems(itemsInCart);
+    let newAmount = itemsInCart.reduce((acc, value) => acc + value.price * value.quantity, 0);
     setAmount(newAmount);
-  }, [cartItems]);
+  }, [itemsInCart]);
 
   return (
     <PageLayout title={"Cart"} pageDescription={"Review items before proceeding with the purchase"}>
