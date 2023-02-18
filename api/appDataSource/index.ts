@@ -13,9 +13,8 @@ export const AppDataSource = new DataSource({
   password: process.env.PGPASSWORD,
   database: process.env.PGDATABASE,
   entities: [User, Product, ProductImage, Order, Address, OrderedProduct],
-  synchronize: true,
-  // dropSchema: true,
-  logging: false,
+  synchronize: process.env.ENV === "dev",
+  logging: process.env.ENV === "dev",
 });
 
 export const userRepository = AppDataSource.getRepository(User);
