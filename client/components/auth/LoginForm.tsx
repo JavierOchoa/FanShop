@@ -95,9 +95,10 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
     const email = inputEmail.current?.value;
     const password = inputPassword.current?.value;
     const confirmPassword = inputConfirmPassword.current?.value;
-    if (confirmPassword !== password) setErrorMessage("Passwords are different");
+    if (type === "signup" && confirmPassword !== password)
+      return setErrorMessage("Passwords are different");
     setError(validate({ name, email, password }));
-    if (!error.email && !error.password && !error.name && password === confirmPassword) {
+    if (!error.email && !error.password && !error.name) {
       if (type === "login") {
         const credentials = {
           email: inputEmail.current!.value,
