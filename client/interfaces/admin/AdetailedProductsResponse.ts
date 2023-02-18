@@ -1,4 +1,4 @@
-import { User } from "../auth/user";
+import { User } from "../auth";
 
 export interface DetailedProduct {
   id?: string;

@@ -44,7 +44,10 @@ authRouter.post("/login", async (req, res) => {
       res.send(routeResponse(false, "User doesn't exists"));
       return;
     }
-    if (!userOnDB.isActive) return res.send(routeResponse(false, "User deactivated"));
+    if (userOnDB.isActive === false) {
+      console.log(userOnDB.isActive);
+      return res.send(routeResponse(false, "User deactivated"));
+    }
     const samePassword = await bcrypt.compare(password, userOnDB.password);
     if (!samePassword) {
       res.send(routeResponse(false, "Wrong password"));

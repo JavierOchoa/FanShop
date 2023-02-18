@@ -48,6 +48,10 @@ export const Navbar = () => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const handleLogout = () => {
+    userLogout();
+  };
   return (
     <AppBar position="static" elevation={0}>
       <Container maxWidth="xl">
@@ -180,7 +184,7 @@ export const Navbar = () => {
                 {settings.map((setting) => (
                   <MenuItem
                     key={setting}
-                    onClick={setting === "Logout" ? userLogout : handleCloseUserMenu}
+                    onClick={setting === "Logout" ? handleLogout : handleCloseUserMenu}
                   >
                     <Link href={setting === "Logout" ? `/` : `/${setting.toLowerCase()}`}>
                       <Typography textAlign="center">{setting}</Typography>

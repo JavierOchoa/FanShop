@@ -108,12 +108,6 @@ export const ProductDialog: FC<PropsWithChildren<Props>> = ({
     setDisabledSaveStatus(true);
   }, [productData]);
 
-  // useEffect(() => {
-  //   const copy = productBody;
-  //   setProductBody(emptyProductBody);
-  //   setProductBody(copy);
-  // }, [imageState]);
-
   useEffect(() => {
     if (dialogType === "edit" && productData?.id) {
       fillData(productData);
@@ -121,7 +115,7 @@ export const ProductDialog: FC<PropsWithChildren<Props>> = ({
     if (dialogType === "new") {
       emptyData();
     }
-  }, [dialogType]);
+  }, [dialogType, productData]);
 
   const validate = (
     fieldToValidate: "title" | "price" | "description" | "stock" | "gender",

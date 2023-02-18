@@ -29,7 +29,7 @@ export const ConfirmDeleteDialog: FC<PropsWithChildren<Props>> = ({
   action = "delete",
 }) => {
   const dispatch = useAppDispatch();
-  const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
+  const openEditDialog = useAppSelector((state) => state.admin.openEditDialog);
   const { deleteProducts, deleteUsers, deactivateUsers, activateUsers } = useAdmin();
   const [childDialogStatus, setChildDialogStatus] = useState<boolean>(false);
   const handleChildDialogStatus = () => setChildDialogStatus(!childDialogStatus);
