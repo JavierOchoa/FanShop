@@ -19,8 +19,8 @@ import {
 import { Add } from "@mui/icons-material";
 import { ConfirmDeleteDialog, EnhancedTableHead } from "..";
 import { ModalType, ProductAdminReponse, TableHeadCell, User } from "../../../interfaces";
-import { UsersTableRows } from "./UserTable/UsersTableRows";
-import { ProductTableRows } from "./ProductTable/ProductTableRows";
+import { UsersTableRows } from "./UserTable";
+import { ProductTableRows } from "./ProductTable";
 
 interface Props {
   tableTitle: string;

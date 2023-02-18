@@ -55,8 +55,8 @@ export default function useAuth() {
     return { successful, message, data };
   };
 
-  const userLogout = () => {
-    removeCookie("fsToken");
+  const userLogout = (isAdmin?: boolean) => {
+    removeCookie("fsToken", { path: isAdmin ? "/admin" : "/" });
     router.reload();
   };
   return {

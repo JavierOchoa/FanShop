@@ -6,6 +6,9 @@ import useAuth from "../../utils/hooks/useAuth";
 export const AdminNav: FC = () => {
   const user = useAppSelector((state) => state.auth.user);
   const { userLogout } = useAuth();
+  const handleLogout = () => {
+    userLogout(true);
+  };
   return (
     <Box>
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -16,7 +19,7 @@ export const AdminNav: FC = () => {
           <Typography variant="h6" sx={{ marginRight: "2rem" }} color={"primary"}>
             Logged in as {user?.fullName}
           </Typography>
-          <Button onClick={userLogout} variant={"contained"}>
+          <Button onClick={handleLogout} variant={"contained"}>
             Logout
           </Button>
         </Toolbar>

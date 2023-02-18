@@ -4,7 +4,7 @@ import { ModalType, TableHeadCell } from "../../interfaces";
 import { AdminLayout } from "../../layouts";
 import { useGetUsersQuery } from "../../redux/services";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
-import { changeOpenEditDialogStatus, changeDialogType } from "../../redux/slices/adminSlice";
+import { changeOpenEditDialogStatus, changeDialogType } from "../../redux/slices";
 
 export default function AdminUser() {
   const dispatch = useAppDispatch();

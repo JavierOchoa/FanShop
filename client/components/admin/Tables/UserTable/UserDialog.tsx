@@ -78,7 +78,7 @@ export const UserDialog: FC<PropsWithChildren<Props>> = ({ userId, openStatus, d
   useEffect(() => {
     if (dialogType === "edit" && userData?.id) setUser(userData);
     if (dialogType === "new") setUser(emptyUser);
-  }, [dialogType]);
+  }, [dialogType, userData]);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
