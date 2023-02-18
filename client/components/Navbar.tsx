@@ -22,9 +22,10 @@ import useAuth from "../utils/hooks/useAuth";
 import { LoginDialog } from "./auth";
 
 const pages = ["Men", "Women", "Kid"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+const settings = ["Dashboard", "Logout"];
 
 export const Navbar = () => {
+  const { userLogout } = useAuth();
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const cartCounter = useAppSelector((state) => state.user.cart) as CartItem[];
@@ -177,8 +178,13 @@ export const Navbar = () => {
                 onClose={handleCloseUserMenu}
               >
                 {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">{setting}</Typography>
+                  <MenuItem
+                    key={setting}
+                    onClick={setting === "Logout" ? userLogout : handleCloseUserMenu}
+                  >
+                    <Link href={setting === "Logout" ? `/` : `/${setting.toLowerCase()}`}>
+                      <Typography textAlign="center">{setting}</Typography>
+                    </Link>
                   </MenuItem>
                 ))}
               </Menu>
