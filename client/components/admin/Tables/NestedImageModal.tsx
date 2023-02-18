@@ -1,14 +1,4 @@
-import { Delete, Visibility } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  IconButton,
-  ImageListItem,
-  Modal,
-  Stack,
-} from "@mui/material";
+import { Box, Button, Dialog, DialogContent, ImageListItem } from "@mui/material";
 import { FC, PropsWithChildren, useState } from "react";
 
 interface Props {

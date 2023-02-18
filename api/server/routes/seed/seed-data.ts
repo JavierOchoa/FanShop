@@ -1,5 +1,5 @@
-import * as bcrypt from "bcrypt";
-import { SeedData } from "../../../interfaces/index";
+import * as bcrypt from "bcryptjs";
+import { SeedData } from "../../../interfaces";
 
 export const initialData: SeedData = {
   admin: {

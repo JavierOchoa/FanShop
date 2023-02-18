@@ -1,9 +1,9 @@
-import { ChangeEvent, createRef, FC, PropsWithChildren, useEffect, useState } from "react";
 import {
   Alert,
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -19,133 +19,109 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DetailedProduct, ModalType, ProductPostResponse } from "../../interfaces";
-import { useAppDispatch } from "../../utils/hooks";
-import { changeOpenEditDialogStatus } from "./../../redux/slices/productSlice";
-import { NestedImageModal } from "../NestedImageModal";
+import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { ChangeEvent, FC, PropsWithChildren, useEffect, useState } from "react";
 import sha1 from "sha1";
-import useAdmin from "../../utils/hooks/useAdmin";
-import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
+import {
+  APIResponse,
+  DetailedProduct,
+  ModalType,
+  ProductBody,
+  ProductErrorState,
+  SizeState,
+  TagState,
+} from "../../../../interfaces";
+import { useGetProductQuery } from "../../../../redux/services";
+import { changeDialogType, changeOpenEditDialogStatus } from "../../../../redux/slices";
+import { useAppDispatch } from "../../../../utils/hooks";
+import useAdmin from "../../../../utils/hooks/useAdmin";
+import { NestedImageModal } from "../NestedImageModal";
+import { ConfirmDeleteDialog } from "../../ConfirmDeleteDialog";
 
 interface Props {
   openStatus: boolean;
-  product: DetailedProduct | undefined;
+  productId: string | undefined;
   dialogType: ModalType;
 }
 
-interface ProductBody {
-  id?: string;
-  title: string;
-  price: string;
-  description: string;
-  stock: string;
-  gender: string;
+interface ImageState {
+  id: number;
+  url: string;
 }
 
-interface SizeState {
-  XS: boolean;
-  S: boolean;
-  M: boolean;
-  L: boolean;
-  XL: boolean;
-  XXL: boolean;
-}
+const emptyProductBody = {
+  id: undefined,
+  title: "",
+  price: "0",
+  description: "",
+  stock: "0",
+  gender: "unisex",
+};
 
-interface TagState {
-  shirt: boolean;
-  pants: boolean;
-  hoodies: boolean;
-  jackets: boolean;
-  hats: boolean;
-  sweatshirts: boolean;
-}
+const emptySizeState = {
+  XS: false,
+  S: false,
+  M: false,
+  L: false,
+  XL: false,
+  XXL: false,
+};
 
-interface errorState {
-  title: errorStatus;
-  price: errorStatus;
-  description: errorStatus;
-  stock: errorStatus;
-  gender: errorStatus;
-}
+const emptyTagState = {
+  shirt: false,
+  pant: false,
+  hoodie: false,
+  jacket: false,
+  hat: false,
+  sweatshirt: false,
+};
 
-interface errorStatus {
-  status: boolean;
-  message: string;
-}
+const emptyError = {
+  title: { status: false, message: "" },
+  price: { status: false, message: "" },
+  description: { status: false, message: "" },
+  stock: { status: false, message: "" },
+  gender: { status: false, message: "" },
+};
 
-export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
+export const ProductDialog: FC<PropsWithChildren<Props>> = ({
   openStatus,
-  product,
+  productId,
   dialogType,
 }) => {
   const dispatch = useAppDispatch();
-  const { handleProductSave, deleteProduct } = useAdmin();
+  const { data: productData, isLoading } = useGetProductQuery(productId ?? skipToken);
+  const { handleProductSave } = useAdmin();
+  const [productBody, setProductBody] = useState<ProductBody>(emptyProductBody);
+  const [sizeState, setSizeState] = useState<SizeState>(emptySizeState);
+  const [tagState, setTagState] = useState<TagState>(emptyTagState);
+  const [imageState, setImageState] = useState<ImageState[]>([]);
   const [disabledSaveStatus, setDisabledSaveStatus] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  const [error, setError] = useState<errorState>({
-    title: { status: false, message: "" },
-    price: { status: false, message: "" },
-    description: { status: false, message: "" },
-    stock: { status: false, message: "" },
-    gender: { status: false, message: "" },
-  });
-  const [productBody, setProductBody] = useState<ProductBody>({
-    id: undefined,
-    title: "",
-    price: "0",
-    description: "",
-    stock: "0",
-    gender: "unisex",
-  });
-
-  const [sizeState, setSizeState] = useState<SizeState>({
-    XS: false,
-    S: false,
-    M: false,
-    L: false,
-    XL: false,
-    XXL: false,
-  });
-  const [tagState, setTagState] = useState<TagState>({
-    shirt: false,
-    pants: false,
-    hoodies: false,
-    jackets: false,
-    hats: false,
-    sweatshirts: false,
-  });
-
-  const [imageState, setImageState] = useState<{ id: number; url: string }[]>([]);
+  const [error, setError] = useState<ProductErrorState>(emptyError);
 
   useEffect(() => {
-    if (product) {
+    if (productData?.id) {
       setErrorMessage(undefined);
-      setProductBody({
-        id: product.id,
-        title: product.title,
-        price: String(product.price),
-        description: product.description,
-        stock: String(product.stock),
-        gender: product.gender,
-      });
-      product.images.forEach((image, index) => {
-        setImageState((prevState) => [...prevState, { id: index, url: image.url }]);
-      });
-      product.sizes.forEach((size) => {
-        setSizeState({
-          ...sizeState,
-          [size]: true,
-        });
-      });
-      product.tags.forEach((tag) => {
-        setTagState({
-          ...tagState,
-          [tag]: true,
-        });
-      });
+      fillData(productData);
     }
     setDisabledSaveStatus(true);
-  }, [product]);
+  }, [productData]);
+
+  // useEffect(() => {
+  //   const copy = productBody;
+  //   setProductBody(emptyProductBody);
+  //   setProductBody(copy);
+  // }, [imageState]);
+
+  useEffect(() => {
+    if (dialogType === "edit" && productData?.id) {
+      fillData(productData);
+    }
+    if (dialogType === "new") {
+      emptyData();
+    }
+  }, [dialogType]);
 
   const validate = (
     fieldToValidate: "title" | "price" | "description" | "stock" | "gender",
@@ -157,7 +133,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
           ...error,
           [fieldToValidate]: {
             status: true,
-            message: "This field is requiered. Can't contain special characters",
+            message: "This field is required. Can't contain special characters",
           },
         });
         setDisabledSaveStatus(true);
@@ -227,39 +203,47 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
       }
     }
   };
-  const handleClose = () => {
-    dispatch(changeOpenEditDialogStatus());
+  const fillData = (productData: DetailedProduct) => {
     setProductBody({
-      title: "",
-      price: "0",
-      description: "",
-      stock: "0",
-      gender: "unisex",
-    });
-    setSizeState({
-      XS: false,
-      S: false,
-      M: false,
-      L: false,
-      XL: false,
-      XXL: false,
-    });
-    setTagState({
-      shirt: false,
-      pants: false,
-      hoodies: false,
-      jackets: false,
-      hats: false,
-      sweatshirts: false,
+      id: productData.id,
+      title: productData.title,
+      price: String(productData.price),
+      description: productData.description,
+      stock: String(productData.stock),
+      gender: productData.gender,
     });
     setImageState([]);
-    setError({
-      title: { status: false, message: "" },
-      price: { status: false, message: "" },
-      description: { status: false, message: "" },
-      stock: { status: false, message: "" },
-      gender: { status: false, message: "" },
+    productData.images.forEach((image, index) => {
+      setImageState((prevState) => [...prevState, { id: index, url: image.url }]);
     });
+
+    setSizeState({
+      XS: productData.sizes.includes("XS"),
+      S: productData.sizes.includes("S"),
+      M: productData.sizes.includes("M"),
+      L: productData.sizes.includes("L"),
+      XL: productData.sizes.includes("XL"),
+      XXL: productData.sizes.includes("XXL"),
+    });
+    setTagState({
+      shirt: productData.tags.includes("shirt"),
+      pant: productData.tags.includes("pant"),
+      hoodie: productData.tags.includes("hoodie"),
+      jacket: productData.tags.includes("jacket"),
+      hat: productData.tags.includes("hat"),
+      sweatshirt: productData.tags.includes("sweatshirt"),
+    });
+  };
+  const emptyData = () => {
+    setProductBody(emptyProductBody);
+    setImageState([]);
+    setTagState(emptyTagState);
+    setSizeState(emptySizeState);
+  };
+  const handleClose = () => {
+    emptyData();
+    dispatch(changeDialogType(undefined));
+    dispatch(changeOpenEditDialogStatus());
   };
   const checkValidations = () => {
     return Object.keys(error).filter((err) => error[err as keyof typeof error]).length;
@@ -290,6 +274,7 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
   const handleDeleteImage = (toDelete: string) => {
     const newImages = imageState.filter((image) => image.url !== toDelete);
     setImageState(newImages);
+    setDisabledSaveStatus(false);
   };
 
   const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -315,10 +300,20 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
       );
       const response = await res.json();
       const currentId = imageState.map((image) => image.id);
-      setImageState((prevState) => [
-        ...prevState,
+      // setImageState((prevState) => [
+      //   ...prevState,
+      //   { id: currentId[0] === 0 ? 1 : 0, url: response.secure_url },
+      // ]);
+      const productBodyCopy = productBody;
+      const imageStateCopy = imageState;
+      setProductBody(emptyProductBody);
+      setImageState([]);
+      setProductBody(productBodyCopy);
+      setImageState(() => [
+        ...imageStateCopy,
         { id: currentId[0] === 0 ? 1 : 0, url: response.secure_url },
       ]);
+      setDisabledSaveStatus(false);
     } catch (err) {
       setErrorMessage((err as Error).message);
     }
@@ -338,11 +333,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
       tags,
       images: imageState,
     };
+    console.log(finalObj);
     try {
-      const saveResponse: ProductPostResponse | undefined = await handleProductSave(
-        finalObj,
-        dialogType
-      );
+      const saveResponse: APIResponse | undefined = await handleProductSave(finalObj, dialogType);
       if (saveResponse?.successful === false) {
         setErrorMessage(saveResponse?.message);
         const numberOfErrors = checkValidations();
@@ -352,17 +345,16 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
         }
         return;
       }
-      dispatch(changeOpenEditDialogStatus());
+      handleClose();
       return saveResponse;
     } catch (err) {
       setErrorMessage((err as Error).message);
       return;
     }
   };
-
   return (
     <Dialog open={openStatus} onClose={handleClose} fullWidth={true} maxWidth={"xl"}>
-      <DialogTitle>Edit product information</DialogTitle>
+      <DialogTitle>Product Information</DialogTitle>
       <DialogContent>
         <Box sx={{ m: 1 }}>
           <FormGroup row sx={{ alignItems: "center", margin: "1rem 0" }}>
@@ -377,27 +369,26 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               helperText={error.title.status ? error.title.message : ""}
             />
             <ImageList sx={{ width: 250, height: 160, marginLeft: "1rem" }}>
-              {imageState.map((item, index) => (
-                <Box key={index}>
-                  <NestedImageModal
-                    imageLink={item.url}
-                    altText={`${productBody.title} ${index}`}
-                  />
-                  <Button variant="text" onClick={() => handleDeleteImage(item.url)}>
-                    Delete
-                  </Button>
-                </Box>
-              ))}
+              {isLoading ? (
+                <CircularProgress />
+              ) : (
+                imageState.map((item, index) => (
+                  <Box key={index + Math.random()}>
+                    <NestedImageModal
+                      imageLink={item.url}
+                      altText={`${productBody.title} - ${item.id}`}
+                    />
+                    <Button variant="text" onClick={() => handleDeleteImage(item.url)}>
+                      Delete
+                    </Button>
+                  </Box>
+                ))
+              )}
+
               {imageState.length < 2 && (
                 <Button variant="contained" component="label">
                   Upload
-                  <input
-                    hidden
-                    accept="image/*"
-                    multiple
-                    type="file"
-                    onChange={handleImageUpload}
-                  />
+                  <input hidden accept="image/*" type="file" onChange={handleImageUpload} />
                 </Button>
               )}
             </ImageList>
@@ -444,9 +435,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               error={error.stock.status}
               helperText={error.stock.status ? error.stock.message : ""}
             />
-            {product && (
+            {productData?.id && (
               <Typography variant="overline" display="block" gutterBottom>
-                Created by: {product.user?.fullName}
+                Created by: {productData?.user?.fullName}
               </Typography>
             )}
           </FormGroup>
@@ -478,15 +469,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               <FormGroup row>
                 <FormControlLabel
                   control={
-                    <Checkbox checked={sizeState.L} onChange={handleSizeChange} name={"L"} />
+                    <Checkbox checked={sizeState.XS} onChange={handleSizeChange} name={"XS"} />
                   }
-                  label={"L"}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={sizeState.M} onChange={handleSizeChange} name={"M"} />
-                  }
-                  label={"M"}
+                  label={"XS"}
                 />
                 <FormControlLabel
                   control={
@@ -496,15 +481,21 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
                 />
                 <FormControlLabel
                   control={
-                    <Checkbox checked={sizeState.XL} onChange={handleSizeChange} name={"XL"} />
+                    <Checkbox checked={sizeState.M} onChange={handleSizeChange} name={"M"} />
                   }
-                  label={"XL"}
+                  label={"M"}
                 />
                 <FormControlLabel
                   control={
-                    <Checkbox checked={sizeState.XS} onChange={handleSizeChange} name={"XS"} />
+                    <Checkbox checked={sizeState.L} onChange={handleSizeChange} name={"L"} />
                   }
-                  label={"XS"}
+                  label={"L"}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox checked={sizeState.XL} onChange={handleSizeChange} name={"XL"} />
+                  }
+                  label={"XL"}
                 />
                 <FormControlLabel
                   control={
@@ -519,16 +510,16 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
               <FormGroup row>
                 <FormControlLabel
                   control={
-                    <Checkbox checked={tagState.hats} onChange={handleTagChange} name={"hats"} />
+                    <Checkbox checked={tagState.hat} onChange={handleTagChange} name={"hat"} />
                   }
                   label={"Hats"}
                 />
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={tagState.hoodies}
+                      checked={tagState.hoodie}
                       onChange={handleTagChange}
-                      name={"hoodies"}
+                      name={"hoodie"}
                     />
                   }
                   label={"Hoodie"}
@@ -536,9 +527,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={tagState.jackets}
+                      checked={tagState.jacket}
                       onChange={handleTagChange}
-                      name={"jackets"}
+                      name={"jacket"}
                     />
                   }
                   label={"Jacket"}
@@ -552,9 +543,9 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={tagState.sweatshirts}
+                      checked={tagState.sweatshirt}
                       onChange={handleTagChange}
-                      name={"sweatshirts"}
+                      name={"sweatshirt"}
                     />
                   }
                   label={"Sweatshirt"}
@@ -570,7 +561,11 @@ export const EditProductDialog: FC<PropsWithChildren<Props>> = ({
             sx={{ m: 2 }}
           >
             {dialogType === "edit" && (
-              <ConfirmDeleteDialog variant="button" productsToDelete={[product!.id!]} />
+              <ConfirmDeleteDialog
+                variant="button"
+                elements={[productData?.id!]}
+                elementType={"product"}
+              />
             )}
             <Button variant="outlined" onClick={handleClose}>
               Cancel

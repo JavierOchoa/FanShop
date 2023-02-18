@@ -39,3 +39,9 @@ next-env.d.ts
 # docker-db
 */postgres
 */docker-compose-pg.yaml
+
+#jetbrains
+.idea/
+
+# pnpm settings for jetbrains in WSL
+*/.npmrc

@@ -1,8 +1,9 @@
 import { Router } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { userRepository } from "../../appDataSource";
 import { User } from "../../appDataSource/entity";
 import jwt from "jsonwebtoken";
+import { routeResponse } from ".";
 
 export const authRouter = Router();
 
@@ -10,23 +11,28 @@ authRouter.post("/signup", async (req, res) => {
   const { email, fullName, password } = req.body;
 
   try {
+    const userOnDb = await userRepository.findOne({ where: { email } });
+    if (userOnDb) {
+      const isActive = userOnDb.isActive;
+      return res.send(routeResponse(false, isActive ? "User already exists" : "User deactivated"));
+    }
     const newUser = new User();
     newUser.email = email;
     newUser.fullName = fullName;
     newUser.password = await bcrypt.hash(password, 10);
     await userRepository.save(newUser);
 
-    res.send(responseRouter(true, `${newUser.email} has been created`, signToken(newUser.id)));
+    res.send(routeResponse(true, `${newUser.email} has been created`, signToken(newUser.id)));
   } catch (error) {
     const reason = handleError(error);
-    res.send(responseRouter(false, reason));
+    res.send(routeResponse(false, reason));
   }
 });
 
 authRouter.post("/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    res.send(responseRouter(false, "Missing data"));
+    res.send(routeResponse(false, "Missing data"));
     return;
   }
   try {
@@ -35,28 +41,21 @@ authRouter.post("/login", async (req, res) => {
       select: { id: true, password: true },
     });
     if (!userOnDB) {
-      res.send(responseRouter(false, "User doesn't exists"));
+      res.send(routeResponse(false, "User doesn't exists"));
       return;
     }
+    if (!userOnDB.isActive) return res.send(routeResponse(false, "User deactivated"));
     const samePassword = await bcrypt.compare(password, userOnDB.password);
     if (!samePassword) {
-      res.send(responseRouter(false, "Wrong password"));
+      res.send(routeResponse(false, "Wrong password"));
       return;
     }
-    res.send(responseRouter(true, "Login successful", signToken(userOnDB.id)));
+    res.send(routeResponse(true, "Login successful", signToken(userOnDB.id)));
   } catch (error) {
     const reason = handleError(error);
-    res.send(responseRouter(false, reason));
+    res.send(routeResponse(false, reason));
   }
 });
-
-const responseRouter = (successful: boolean, message: string, token?: string) => {
-  return {
-    successful,
-    message,
-    ...(token && { token }),
-  };
-};
 
 const signToken = (id: string) => {
   return jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: "8d" });

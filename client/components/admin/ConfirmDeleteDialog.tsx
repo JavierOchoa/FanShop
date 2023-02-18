@@ -1,5 +1,5 @@
 import { FC, useState, PropsWithChildren } from "react";
-import { Delete } from "@mui/icons-material";
+import { Block, Delete, Done } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -12,35 +12,69 @@ import {
   Tooltip,
 } from "@mui/material";
 import useAdmin from "../../utils/hooks/useAdmin";
-import { useAppDispatch } from "../../utils/hooks";
+import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { changeOpenEditDialogStatus } from "../../redux/slices";
 
 interface Props {
   variant: "tooltip" | "button";
-  productsToDelete: string[];
+  elementType: "user" | "product";
+  elements: string[];
+  action?: "delete" | "deactivate" | "activate";
 }
 
 export const ConfirmDeleteDialog: FC<PropsWithChildren<Props>> = ({
   variant,
-  productsToDelete,
+  elementType,
+  elements,
+  action = "delete",
 }) => {
   const dispatch = useAppDispatch();
-  const { deleteProducts } = useAdmin();
+  const openEditDialog = useAppSelector((state) => state.products.openEditDialog);
+  const { deleteProducts, deleteUsers, deactivateUsers, activateUsers } = useAdmin();
   const [childDialogStatus, setChildDialogStatus] = useState<boolean>(false);
   const handleChildDialogStatus = () => setChildDialogStatus(!childDialogStatus);
-  const handleDeleteProducts = () => {
-    deleteProducts(productsToDelete);
+  const handleActivate = () => {
+    activateUsers(elements);
     handleChildDialogStatus();
-    dispatch(changeOpenEditDialogStatus());
+    openEditDialog ? dispatch(changeOpenEditDialogStatus()) : null;
+  };
+  const handleDeactivate = () => {
+    deactivateUsers(elements);
+    handleChildDialogStatus();
+    openEditDialog ? dispatch(changeOpenEditDialogStatus()) : null;
+  };
+  const handleDelete = () => {
+    if (elementType === "product") deleteProducts(elements);
+    if (elementType === "user") deleteUsers(elements);
+    handleChildDialogStatus();
+    openEditDialog ? dispatch(changeOpenEditDialogStatus()) : null;
   };
   return (
     <Box>
       {variant === "tooltip" ? (
-        <Tooltip title="Delete">
-          <IconButton onClick={handleChildDialogStatus}>
-            <Delete />
-          </IconButton>
-        </Tooltip>
+        <Box>
+          {action === "delete" && (
+            <Tooltip title="Delete">
+              <IconButton onClick={handleChildDialogStatus}>
+                <Delete />
+              </IconButton>
+            </Tooltip>
+          )}
+          {action === "deactivate" && (
+            <Tooltip title="Deactivate">
+              <IconButton onClick={handleChildDialogStatus}>
+                <Block />
+              </IconButton>
+            </Tooltip>
+          )}
+          {action === "activate" && (
+            <Tooltip title="Activate">
+              <IconButton onClick={handleChildDialogStatus}>
+                <Done />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       ) : (
         <Button variant={"contained"} onClick={handleChildDialogStatus} color={"error"}>
           Delete
@@ -50,14 +84,26 @@ export const ConfirmDeleteDialog: FC<PropsWithChildren<Props>> = ({
         <DialogTitle>{"Are you sure?"}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            You are about to delete {productsToDelete.length} product
-            {productsToDelete.length > 1 && "s"}
+            You are about to {action} {elements.length} {elementType}
+            {elements.length > 1 && "s"}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ mb: 1, mr: 1 }}>
-          <Button onClick={handleDeleteProducts} variant={"outlined"} color={"error"}>
-            Delete
-          </Button>
+          {action === "delete" && (
+            <Button onClick={handleDelete} variant={"outlined"} color={"error"}>
+              Delete
+            </Button>
+          )}
+          {action === "activate" && (
+            <Button onClick={handleActivate} variant={"contained"} color={"error"}>
+              Activate
+            </Button>
+          )}
+          {action === "deactivate" && (
+            <Button onClick={handleDeactivate} variant={"contained"} color={"error"}>
+              Deactivate
+            </Button>
+          )}
           <Button onClick={handleChildDialogStatus} variant={"outlined"} autoFocus>
             Cancel
           </Button>

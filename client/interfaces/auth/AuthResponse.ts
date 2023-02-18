@@ -1,5 +1,5 @@
-export interface AuthResponse {
-  successful: boolean;
-  message: string;
-  token?: string;
+import { APIResponse } from "..";
+
+export interface AuthResponse extends APIResponse {
+  data?: string;
 }

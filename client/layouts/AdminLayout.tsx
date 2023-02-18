@@ -1,7 +1,7 @@
 import { Toolbar, Box, CircularProgress } from "@mui/material";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { FC, PropsWithChildren, useEffect } from "react";
+import { FC, PropsWithChildren } from "react";
 import { AdminNav, AdminDrawer } from "../components/admin";
 import useAuth from "../utils/hooks/useAuth";
 
@@ -17,7 +17,7 @@ export const AdminLayout: FC<PropsWithChildren<Props>> = ({
   pageDescription,
   imageFullUrl,
 }) => {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, user } = useAuth();
   const router = useRouter();
 
   if (isLoading) {
@@ -29,8 +29,8 @@ export const AdminLayout: FC<PropsWithChildren<Props>> = ({
       </Box>
     );
   }
-  if (!isLoading && !isAuthenticated) {
-    router.push(`/admin/login?p=${router.pathname}`);
+  if (!user) {
+    router.push(`/admin/login?p=${router.pathname}`).catch((e) => console.log(e));
     return <></>;
   }
   return (

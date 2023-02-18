@@ -6,7 +6,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Order } from "./Order";
 import { Product } from "./Product";
+import { Address } from "./Address";
 
 @Entity()
 export class User {
@@ -29,11 +31,21 @@ export class User {
   roles: string[];
 
   @OneToMany(() => Product, (product) => product.user)
-  product: Product;
+  products: Product[];
+
+  @OneToMany(() => Order, (order) => order.user, {
+    cascade: true,
+  })
+  orders: Order[];
+
+  @OneToMany(() => Address, (address) => address.user, {
+    cascade: true,
+  })
+  addresses: Address[];
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
-    this.email = this.email.toLowerCase().trim();
+    this.email = this.email?.toLowerCase().trim();
   }
 
   @BeforeUpdate()

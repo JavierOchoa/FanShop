@@ -1,6 +1,15 @@
 import { createTheme } from "@mui/material";
 
 export const ligthTheme = createTheme({
+  components: {
+    MuiAppBar: {
+      styleOverrides: {
+        colorPrimary: {
+          backgroundColor: "white",
+        },
+      },
+    },
+  },
   palette: {
     mode: "light",
     primary: {

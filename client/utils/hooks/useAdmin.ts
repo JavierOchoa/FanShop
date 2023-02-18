@@ -1,33 +1,30 @@
-import { useState, useEffect } from "react";
-import { useAppSelector } from ".";
-import { DetailedProduct, ModalType, ProductPost, ProductPostResponse } from "../../interfaces";
+import { ModalType, ProductPost, APIResponse, UserPost } from "../../interfaces";
 import {
   useGetProductDetailsMutation,
   useEditProductMutation,
   useAddProductMutation,
   useRemoveProductMutation,
+  useRemoveUserMutation,
+  useDeactivateUserMutation,
+  useActivateUserMutation,
+  useEditUserMutation,
+  useAddUserMutation,
 } from "../../redux/services";
 
 export default function useAdmin() {
-  const token = useAppSelector((state) => state.auth.token);
-  // const [getProducts, { data: productList, isLoading: loadingProducts }] = useGetProductsMutation();
   const [getProductInfo, { isLoading: loadingProductDetails }] = useGetProductDetailsMutation();
-  const [editProduct, { isLoading: loadingProductEdit }] = useEditProductMutation();
-  const [addProduct, { isLoading: loadingProductCreation }] = useAddProductMutation();
-  const [removeProduct, { isLoading: loadingProductRemoval }] = useRemoveProductMutation();
-  // const { data, isLoading: loLo } = useTestEndpointQuery();
-  const [finalProduct, setFinalProduct] = useState<DetailedProduct | undefined>(undefined);
-
-  // useEffect(() => {
-  //   if (token !== null) {
-  //     getProducts();
-  //   }
-  // }, [token]);
+  const [editProduct] = useEditProductMutation();
+  const [addProduct] = useAddProductMutation();
+  const [removeProduct] = useRemoveProductMutation();
+  const [editUserMutation] = useEditUserMutation();
+  const [addUserMutation] = useAddUserMutation();
+  const [activateUserMutation] = useActivateUserMutation();
+  const [deactivateUserMutation] = useDeactivateUserMutation();
+  const [removeUser] = useRemoveUserMutation();
 
   const getDetailedProduct = async (productId: string) => {
     try {
       const detailedProduct = await getProductInfo(productId).unwrap();
-      setFinalProduct(detailedProduct);
       return detailedProduct;
     } catch (err) {
       console.log(err);
@@ -53,8 +50,7 @@ export default function useAdmin() {
   };
 
   const handleProductSave = async (product: ProductPost, typeEdit: ModalType) => {
-    let response: ProductPostResponse | undefined;
-    console.log(product, typeEdit);
+    let response: APIResponse | undefined;
     try {
       typeEdit === "edit"
         ? (response = await postEditProduct(product))
@@ -83,6 +79,63 @@ export default function useAdmin() {
     }
   };
 
+  const postAddUser = async (userToAdd: UserPost) => {
+    try {
+      const addUserResponse = await addUserMutation(userToAdd).unwrap();
+      return addUserResponse;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const postEditUser = async (userToEdit: UserPost) => {
+    try {
+      const editUserResponse = await editUserMutation(userToEdit).unwrap();
+      return editUserResponse;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleUserSave = async (user: UserPost, typeEdit: ModalType) => {
+    let response: APIResponse | undefined;
+    try {
+      typeEdit === "edit"
+        ? (response = await postEditUser(user))
+        : (response = await postAddUser(user));
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const deleteUsers = async (usersToDelete: string[]) => {
+    try {
+      const toResolve = usersToDelete.map((user) => removeUser(user).unwrap());
+      await Promise.all(toResolve);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const activateUsers = async (usersToActivate: string[]) => {
+    try {
+      const toResolve = usersToActivate.map((user) => activateUserMutation(user).unwrap());
+      await Promise.all(toResolve);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const deactivateUsers = async (usersToDeactivate: string[]) => {
+    try {
+      const toResolve = usersToDeactivate.map((user) => deactivateUserMutation(user).unwrap());
+      await Promise.all(toResolve);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return {
     getDetailedProduct,
     postEditProduct,
@@ -91,5 +144,11 @@ export default function useAdmin() {
     deleteProduct,
     loadingProductDetails,
     deleteProducts,
+    postAddUser,
+    postEditUser,
+    activateUsers,
+    deactivateUsers,
+    deleteUsers,
+    handleUserSave,
   };
 }

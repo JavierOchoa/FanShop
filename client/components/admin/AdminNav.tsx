@@ -10,13 +10,13 @@ export const AdminNav: FC = () => {
     <Box>
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          <Typography variant="h5" sx={{ flexGrow: 1 }}>
+          <Typography variant="h5" sx={{ flexGrow: 1 }} color={"primary"}>
             Admin Panel
           </Typography>
-          <Typography variant="h6" sx={{ marginRight: "2rem" }}>
+          <Typography variant="h6" sx={{ marginRight: "2rem" }} color={"primary"}>
             Logged in as {user?.fullName}
           </Typography>
-          <Button color="inherit" onClick={userLogout}>
+          <Button onClick={userLogout} variant={"contained"}>
             Logout
           </Button>
         </Toolbar>

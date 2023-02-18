@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { UserInfo } from "../../interfaces";
-import type { RootState } from "../store";
 
 type AuthState = {
   user: UserInfo | null;
@@ -30,11 +29,25 @@ const authSlice = createSlice({
     setUser: (state, { payload }: PayloadAction<UserInfo>) => {
       state.user = payload;
     },
+    updateEmail: (state, { payload }: PayloadAction<string>) => {
+      state.user = {
+        fullName: state.user?.fullName || "",
+        email: payload,
+        isActive: state.user?.isActive || true,
+        roles: state.user?.roles || [],
+      };
+    },
+    updateName: (state, { payload }: PayloadAction<string>) => {
+      state.user = {
+        fullName: payload,
+        email: state.user?.email || "",
+        isActive: state.user?.isActive || true,
+        roles: state.user?.roles || [],
+      };
+    },
   },
 });
 
-export const { setCredentials, setToken, setUser } = authSlice.actions;
+export const { setToken, setUser, updateEmail, updateName } = authSlice.actions;
 
 export default authSlice.reducer;
-
-// export const selectCurrentUser = (state: RootState) => state.auth.user;
