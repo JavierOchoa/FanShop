@@ -171,6 +171,13 @@ export const api = createApi({
         body: informationToUpdate,
       }),
     }),
+    deactivateRequestUser: builder.mutation<APIResponse, string>({
+      query: (password) => ({
+        url: `/user/account/deactivate`,
+        method: "POST",
+        body: { password },
+      }),
+    }),
     getUserAddresses: builder.query<AddressesResponse, void>({
       query: () => "/user/addresses",
       providesTags: ["AddressesList"],
@@ -249,6 +256,7 @@ export const {
   useGetProductsListQuery,
   useGetProductInformationQuery,
   useUpdateUserMutation,
+  useDeactivateRequestUserMutation,
   useCreateOrderMutation,
   useGetUserAddressesQuery,
   useCreateAddressMutation,

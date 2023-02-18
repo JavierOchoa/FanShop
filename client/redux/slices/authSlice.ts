@@ -29,9 +29,25 @@ const authSlice = createSlice({
     setUser: (state, { payload }: PayloadAction<UserInfo>) => {
       state.user = payload;
     },
+    updateEmail: (state, { payload }: PayloadAction<string>) => {
+      state.user = {
+        fullName: state.user?.fullName || "",
+        email: payload,
+        isActive: state.user?.isActive || true,
+        roles: state.user?.roles || [],
+      };
+    },
+    updateName: (state, { payload }: PayloadAction<string>) => {
+      state.user = {
+        fullName: payload,
+        email: state.user?.email || "",
+        isActive: state.user?.isActive || true,
+        roles: state.user?.roles || [],
+      };
+    },
   },
 });
 
-export const { setCredentials, setToken, setUser } = authSlice.actions;
+export const { setToken, setUser, updateEmail, updateName } = authSlice.actions;
 
 export default authSlice.reducer;

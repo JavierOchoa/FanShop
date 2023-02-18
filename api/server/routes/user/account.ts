@@ -125,3 +125,29 @@ accountRouter.post(
     }
   }
 );
+
+accountRouter.post(
+  "/deactivate",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const { id } = req.user as User;
+    const { password } = req.body;
+    try {
+      const userOnDb = await userRepository.findOne({
+        where: { id },
+        select: { id: true, password: true },
+      });
+
+      if (!userOnDb) return;
+      const samePassword = await bcrypt.compare(password, userOnDb.password);
+      if (!samePassword) {
+        return res.send(routeResponse(false, "Incorrect Password"));
+      }
+      userOnDb.isActive = false;
+      await userRepository.save(userOnDb);
+      return res.send(routeResponse(true, "User Deactivated"));
+    } catch (e) {
+      return res.send(routeResponse(false, (e as Error).message));
+    }
+  }
+);

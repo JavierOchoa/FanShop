@@ -1,8 +1,21 @@
 import { UpdateAccount, UserInfo } from "../../interfaces";
 import { useAppSelector } from "../../utils/hooks";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useUpdateUserMutation } from "../../redux/services";
-import { Alert, Box, Button, Stack, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import useUser from "../../utils/hooks/useUser";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 type EditType = "fullName" | "email" | "password" | "all";
 export const Account = () => {
@@ -16,12 +29,15 @@ export const Account = () => {
   const [editPassword, setEditPassword] = useState<boolean>(false);
   const [startDeactivation, setStartDeactivation] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  const [updateUser] = useUpdateUserMutation();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const { updateUser, deactivateUser } = useUser();
 
   useEffect(() => {
     setNameField(userInfo?.fullName);
     setEmailField(userInfo?.email);
   }, [userInfo]);
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
 
   const handleClear = () => {
     setNameField(userInfo?.fullName);
@@ -36,18 +52,21 @@ export const Account = () => {
       handleClear();
       setEditEmail(false);
       setEditPassword(false);
+      setStartDeactivation(false);
       setEditName(!editName);
     }
     if (type === "email") {
       handleClear();
       setEditName(false);
       setEditPassword(false);
+      setStartDeactivation(false);
       setEditEmail(!editEmail);
     }
     if (type === "password") {
       handleClear();
       setEditName(false);
       setEditEmail(false);
+      setStartDeactivation(false);
       setEditPassword(!editPassword);
     }
     if (type === "all") {
@@ -55,10 +74,14 @@ export const Account = () => {
       setEditName(false);
       setEditEmail(false);
       setEditPassword(false);
+      setStartDeactivation(false);
     }
   };
 
   const handleStartDeactivation = () => {
+    setEditName(false);
+    setEditEmail(false);
+    setEditPassword(false);
     setStartDeactivation(!startDeactivation);
   };
 
@@ -89,12 +112,28 @@ export const Account = () => {
     if (editPassword) {
       objToUpdate["newPassword"] = passwordField;
     }
-    const data = await updateUser(objToUpdate).unwrap();
-    if (!data.successful) {
-      setErrorMessage(data.message);
+    try {
+      const data = await updateUser(objToUpdate);
+      if (!data.successful) {
+        return setErrorMessage(data.message);
+      }
+      handleEditFields("all");
+      return;
+    } catch (e) {
+      return setErrorMessage((e as Error).message);
     }
-    handleEditFields("all");
-    return;
+  };
+
+  const handleDeactivate = async () => {
+    try {
+      const data = await deactivateUser(currentPassword);
+      if (!data.successful) {
+        return setErrorMessage(data.message);
+      }
+      return;
+    } catch (e) {
+      return setErrorMessage((e as Error).message);
+    }
   };
 
   return (
@@ -120,7 +159,7 @@ export const Account = () => {
           {userInfo?.email}
         </Typography>
         <TextField
-          id={"Email"}
+          id={"email"}
           label={"Email"}
           value={emailField}
           size={"small"}
@@ -132,14 +171,30 @@ export const Account = () => {
       </Box>
       <Box display={"flex"} alignItems={"center"} mb={4}>
         <Typography fontSize={"large"}>Password:</Typography>
-        <TextField
-          id={"newPassword"}
-          label={"New Password"}
-          value={passwordField}
-          size={"small"}
-          onChange={handleFieldChange}
-          sx={{ display: editPassword ? "block" : "none", mx: 1 }}
-        />
+        <FormControl variant="outlined" sx={{ mx: 2, display: editPassword ? "block" : "none" }}>
+          <InputLabel htmlFor={"newPassword"} sx={{ pt: 1 }}>
+            New Password
+          </InputLabel>
+          <OutlinedInput
+            id={"newPassword"}
+            type={showPassword ? "text" : "password"}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label="New Password"
+            value={passwordField}
+            onChange={handleFieldChange}
+            sx={{ mt: 1 }}
+          />
+        </FormControl>
 
         <Button onClick={() => handleEditFields("password")}>
           {editPassword ? "Cancel" : "Edit"}
@@ -151,14 +206,31 @@ export const Account = () => {
         alignItems={"center"}
         justifyContent={"center"}
       >
-        <Box my={2}>
-          <TextField
-            id={"currentPassword"}
-            label={"Current Password"}
-            value={currentPassword}
-            onChange={handleFieldChange}
-            size={"small"}
-          />
+        <Box my={2} display={"flex"} alignItems={"center"}>
+          <FormControl variant="outlined">
+            <InputLabel htmlFor={"currentPassword"} sx={{ pt: 1 }}>
+              Current Password
+            </InputLabel>
+            <OutlinedInput
+              id={"currentPassword"}
+              type={showPassword ? "text" : "password"}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Current Password"
+              value={currentPassword}
+              onChange={handleFieldChange}
+              sx={{ mt: 1 }}
+            />
+          </FormControl>
           <Button
             variant={"contained"}
             sx={{ mx: 2 }}
@@ -185,18 +257,42 @@ export const Account = () => {
             <Typography variant={"overline"} color={"error"}>
               ARE YOU SURE? THIS IS IRREVERSIBLE
             </Typography>
-            <TextField
-              id={"currentPassword"}
-              label={"Current Password"}
-              value={currentPassword}
-              onChange={handleFieldChange}
-              size={"small"}
-            />
+            <FormControl variant="outlined">
+              <InputLabel htmlFor={"currentPassword"} sx={{ pt: 1 }}>
+                Current Password
+              </InputLabel>
+              <OutlinedInput
+                id={"currentPassword"}
+                type={showPassword ? "text" : "password"}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                label="Current Password"
+                value={currentPassword}
+                onChange={handleFieldChange}
+                sx={{ mt: 1 }}
+              />
+            </FormControl>
+            {errorMessage && (
+              <Alert variant="filled" severity="error" sx={{ my: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
             <Stack spacing={2} direction={"row"} sx={{ my: 3 }}>
               <Button variant={"contained"} onClick={handleStartDeactivation}>
                 Cancel
               </Button>
-              <Button color={"error"}>Deactivate</Button>
+              <Button color={"error"} onClick={handleDeactivate}>
+                Deactivate
+              </Button>
             </Stack>
           </Box>
         )}
