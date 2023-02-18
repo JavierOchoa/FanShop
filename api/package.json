@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "tsc": "tsc",
+    "build": "rimraf ./build && tsc",
+    "start": "node build/index.js",
     "dev": "ts-node-dev index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "pgup": "docker-compose -f docker-compose-pg.yaml up -d",
@@ -23,6 +24,7 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "reflect-metadata": "^0.1.13",
+    "rimraf": "^4.1.2",
     "typeorm": "^0.3.11"
   },
   "devDependencies": {
