@@ -11,6 +11,11 @@ authRouter.post("/signup", async (req, res) => {
   const { email, fullName, password } = req.body;
 
   try {
+    const userOnDb = await userRepository.findOne({ where: { email } });
+    if (userOnDb) {
+      const isActive = userOnDb.isActive;
+      return res.send(routeResponse(false, isActive ? "User already exists" : "User deactivated"));
+    }
     const newUser = new User();
     newUser.email = email;
     newUser.fullName = fullName;
@@ -39,6 +44,7 @@ authRouter.post("/login", async (req, res) => {
       res.send(routeResponse(false, "User doesn't exists"));
       return;
     }
+    if (!userOnDB.isActive) return res.send(routeResponse(false, "User deactivated"));
     const samePassword = await bcrypt.compare(password, userOnDB.password);
     if (!samePassword) {
       res.send(routeResponse(false, "Wrong password"));
