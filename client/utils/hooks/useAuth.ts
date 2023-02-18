@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { getCookie, removeCookie, setCookie } from "typescript-cookie";
-import { useAppSelector, useAppDispatch } from "./../hooks";
-import { setToken, setUser } from "./../../redux/slices";
+import { useAppSelector, useAppDispatch } from "./index";
+import { setToken, setUser } from "../../redux/slices";
 import { useGetUserInfoMutation, useLoginMutation, useSignUpMutation } from "../../redux/services";
-import { LoginRequest, SignUpRequest } from "./../../interfaces";
+import { LoginRequest, SignUpRequest } from "../../interfaces";
 import { useRouter } from "next/router";
 
 export default function useAuth() {
@@ -12,8 +12,8 @@ export default function useAuth() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const [getUserInfo, { data: userInfo }] = useGetUserInfoMutation();
-  const [login, { isLoading: loginRequestLoading }] = useLoginMutation();
-  const [signup, { isLoading: signUpRequestLoading }] = useSignUpMutation();
+  const [login, { data: loginResponse, isLoading: loginRequestLoading }] = useLoginMutation();
+  const [signup, { data: signupResponse, isLoading: signUpRequestLoading }] = useSignUpMutation();
   const router = useRouter();
   useEffect(() => {
     const storedCookie = getCookie("fsToken");
@@ -68,5 +68,7 @@ export default function useAuth() {
     userLogout,
     userSignUp,
     signUpRequestLoading,
+    loginResponse,
+    signupResponse,
   };
 }

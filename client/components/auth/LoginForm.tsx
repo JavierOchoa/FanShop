@@ -1,6 +1,7 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import {
+  Alert,
   Button,
   FormControl,
   FormLabel,
@@ -11,7 +12,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import { createRef, FC, FormEvent, PropsWithChildren, useState } from "react";
+import { createRef, FC, FormEvent, PropsWithChildren, useEffect, useState } from "react";
 import useAuth from "../../utils/hooks/useAuth";
 
 interface InfoToValidate {
@@ -32,11 +33,27 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
   const inputName = createRef<HTMLInputElement>();
   const inputEmail = createRef<HTMLInputElement>();
   const inputPassword = createRef<HTMLInputElement>();
-  const { userLogin, loginRequestLoading, userSignUp, signUpRequestLoading } = useAuth();
+  const inputConfirmPassword = createRef<HTMLInputElement>();
+
+  const {
+    userLogin,
+    loginRequestLoading,
+    userSignUp,
+    signUpRequestLoading,
+    loginResponse,
+    signupResponse,
+  } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [type, setType] = useState<authForm>(formType);
   const [error, setError] = useState<InfoToValidate>({});
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (loginResponse && loginResponse.successful === false) setErrorMessage(loginResponse.message);
+    if (signupResponse && signupResponse.successful === false)
+      setErrorMessage(signupResponse.message);
+  }, [loginResponse, signupResponse]);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -77,8 +94,10 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
     const name = inputName.current?.value;
     const email = inputEmail.current?.value;
     const password = inputPassword.current?.value;
+    const confirmPassword = inputConfirmPassword.current?.value;
+    if (confirmPassword !== password) setErrorMessage("Passwords are different");
     setError(validate({ name, email, password }));
-    if (!error.email && !error.password && !error.name) {
+    if (!error.email && !error.password && !error.name && password === confirmPassword) {
       if (type === "login") {
         const credentials = {
           email: inputEmail.current!.value,
@@ -136,7 +155,7 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
             label="Name"
             inputRef={inputName}
             error={!!error.name}
-            sx={{ mt: 1 }}
+            sx={{ my: 1 }}
           />
         )}
         <TextField
@@ -145,7 +164,7 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
           label="Email"
           inputRef={inputEmail}
           error={!!error.email}
-          sx={{ mt: 1 }}
+          sx={{ my: 1 }}
         />
         <FormControl variant="outlined">
           <InputLabel htmlFor="password" sx={{ pt: 1 }}>
@@ -170,21 +189,51 @@ export const LoginForm: FC<PropsWithChildren<Props>> = ({ formType = "login", ad
             error={!!error.password}
             sx={{ mt: 1 }}
           />
-          {!admin && (
-            <Button sx={{ my: 2 }} onClick={handleType}>
-              {type === "login" ? "Create account" : "Already have an account?"}
-            </Button>
-          )}
-          <LoadingButton
-            type={"submit"}
-            loading={loginRequestLoading || signUpRequestLoading}
-            loadingIndicator="Loading..."
-            variant="contained"
-            sx={{ mt: 2 }}
-          >
-            {type === "login" ? "Login" : "Sign up"}
-          </LoadingButton>
         </FormControl>
+        {type === "signup" && (
+          <FormControl variant="outlined">
+            <InputLabel htmlFor="confirm-password" sx={{ pt: 1 }}>
+              Confirm Password
+            </InputLabel>
+            <OutlinedInput
+              id="confirm-password"
+              type={showPassword ? "text" : "password"}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle confirm password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Password"
+              inputRef={inputConfirmPassword}
+              sx={{ mt: 1 }}
+            />
+          </FormControl>
+        )}
+        {!admin && (
+          <Button sx={{ my: 2 }} onClick={handleType}>
+            {type === "login" ? "Create account" : "Already have an account?"}
+          </Button>
+        )}
+        <LoadingButton
+          type={"submit"}
+          loading={loginRequestLoading || signUpRequestLoading}
+          loadingIndicator="Loading..."
+          variant="contained"
+          sx={{ mt: 2 }}
+        >
+          {type === "login" ? "Login" : "Sign up"}
+        </LoadingButton>
+        {errorMessage && (
+          <Alert severity={"error"} variant={"filled"} sx={{ my: 1 }}>
+            {errorMessage}
+          </Alert>
+        )}
       </FormControl>
     </form>
   );
