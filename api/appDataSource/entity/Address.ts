@@ -25,9 +25,13 @@ export class Address {
   @Column("text")
   country: string;
 
-  @OneToMany(() => Order, (order) => order.address)
+  @OneToMany(() => Order, (order) => order.address, {
+    onDelete: "CASCADE",
+  })
   orders: Order[];
 
-  @ManyToOne(() => User, (user) => user.addresses)
+  @ManyToOne(() => User, (user) => user.addresses, {
+    onDelete: "CASCADE",
+  })
   user: User;
 }

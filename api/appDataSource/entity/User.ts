@@ -33,10 +33,14 @@ export class User {
   @OneToMany(() => Product, (product) => product.user)
   products: Product[];
 
-  @OneToMany(() => Order, (order) => order.user)
+  @OneToMany(() => Order, (order) => order.user, {
+    cascade: true,
+  })
   orders: Order[];
 
-  @OneToMany(() => Address, (address) => address.user)
+  @OneToMany(() => Address, (address) => address.user, {
+    cascade: true,
+  })
   addresses: Address[];
 
   @BeforeInsert()

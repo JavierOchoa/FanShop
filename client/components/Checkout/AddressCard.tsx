@@ -6,8 +6,8 @@ import useCheckout from "../../utils/hooks/useCheckout";
 interface Props {
   address: AddressBody;
   editFunction: (address: AddressBody) => void;
-  selectFunction: (address: AddressBody) => void;
-  selectedAddress: string;
+  selectFunction?: (address: AddressBody) => void;
+  selectedAddress?: string;
 }
 
 export const AddressCard: FC<PropsWithChildren<Props>> = ({
@@ -26,20 +26,24 @@ export const AddressCard: FC<PropsWithChildren<Props>> = ({
   };
 
   const handleChange = () => {
-    selectFunction(address);
+    if (selectFunction) {
+      selectFunction(address);
+    }
   };
 
   return (
     <Card sx={{ mb: 2 }}>
       <CardContent sx={{ display: "flex" }}>
-        <Radio
-          disableRipple
-          checked={selectedAddress === address.id}
-          onChange={handleChange}
-          value="a"
-          name="radio-buttons"
-          inputProps={{ "aria-label": "A" }}
-        />
+        {selectFunction && (
+          <Radio
+            disableRipple
+            checked={selectedAddress === address.id}
+            onChange={handleChange}
+            value="a"
+            name="radio-buttons"
+            inputProps={{ "aria-label": "A" }}
+          />
+        )}
         <Box alignSelf={"center"}>
           <Box mx={2}>
             <Typography>{address.fullName}</Typography>
@@ -54,7 +58,7 @@ export const AddressCard: FC<PropsWithChildren<Props>> = ({
           <Button sx={{ mx: 1 }} onClick={handleEdit}>
             EDIT
           </Button>
-          <Button onClick={handleRemove}>REMOVE</Button>
+          {selectFunction && <Button onClick={handleRemove}>REMOVE</Button>}
         </Box>
       </CardContent>
     </Card>

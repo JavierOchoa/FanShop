@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { initialData } from "./seed-data";
-import { productImageRepository, productRepository, userRepository } from "../../../appDataSource";
+import { orderRepository, productImageRepository, productRepository, userRepository } from "../../../appDataSource";
 import { User } from "../../../appDataSource/entity";
 import { SeedProduct, SeedUser } from "../../../interfaces";
 // import passport from "passport";
@@ -22,6 +22,7 @@ seedRouter.get("/", async (req, res) => {
       return res.status(401).send(routeResponse(false, "Unauthorized"));
     }
 
+    await orderRepository.createQueryBuilder('order').delete().where({}).execute()
     await productRepository.createQueryBuilder("product").delete().where({}).execute();
     await userRepository.createQueryBuilder("user").delete().where({}).execute();
 

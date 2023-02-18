@@ -2,6 +2,7 @@ import { Box, Tab, Tabs } from "@mui/material";
 import React, { SyntheticEvent, useState } from "react";
 import { Account } from "./Account";
 import { OrderHistory } from "./OrderHistory";
+import { ShippingAddresses } from "./ShippingAddresses";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -29,13 +30,13 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const pages = ["Account", "Orders", "Shipping"];
+const pages = ["Account", "Orders", "Addresses"];
 export const DashboardTabs = () => {
   const [value, setValue] = useState(0);
   const handleChange = (_event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-  
+
   return (
     <Box display={"flex"} flexWrap={"wrap"} sx={{ mt: 2 }}>
       <Tabs
@@ -56,7 +57,7 @@ export const DashboardTabs = () => {
         <OrderHistory />
       </TabPanel>
       <TabPanel index={value} value={2}>
-        PLACEHOLDER
+        <ShippingAddresses />
       </TabPanel>
     </Box>
   );

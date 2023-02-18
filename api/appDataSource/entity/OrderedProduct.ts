@@ -15,6 +15,8 @@ export class OrderedProduct {
   @Column("float")
   price: number;
 
-  @ManyToOne(() => Product, (product) => product.ordered)
+  @ManyToOne(() => Product, (product) => product.ordered, {
+    onDelete: "CASCADE",
+  })
   product: Product;
 }
