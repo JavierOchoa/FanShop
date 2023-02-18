@@ -1,6 +1,11 @@
 import { Router } from "express";
 import { initialData } from "./seed-data";
-import { orderRepository, productImageRepository, productRepository, userRepository } from "../../../appDataSource";
+import {
+  orderRepository,
+  productImageRepository,
+  productRepository,
+  userRepository,
+} from "../../../appDataSource";
 import { User } from "../../../appDataSource/entity";
 import { SeedProduct, SeedUser } from "../../../interfaces";
 // import passport from "passport";
@@ -8,21 +13,15 @@ import { routeResponse } from "..";
 
 export const seedRouter = Router();
 
-seedRouter.get("/", async (req, res) => {
+seedRouter.post("/", async (req, res) => {
   try {
-    // const user = req.user as User;
-
-    // if (!user.roles.includes("admin")) {
-    //   res.status(401).send(routeResponse(false, "Unauthorized"));
-    //   return;
-
     const { seedKey } = req.body;
 
     if (seedKey !== process.env.SEED_KEY) {
       return res.status(401).send(routeResponse(false, "Unauthorized"));
     }
 
-    await orderRepository.createQueryBuilder('order').delete().where({}).execute()
+    await orderRepository.createQueryBuilder("order").delete().where({}).execute();
     await productRepository.createQueryBuilder("product").delete().where({}).execute();
     await userRepository.createQueryBuilder("user").delete().where({}).execute();
 
