@@ -45,6 +45,26 @@ export default function AdminPanel() {
               </Item>
             </Link>
           </Grid>
+          <Grid item xs={6} md={1}>
+            <Item>
+              <Typography variant={"h4"}>{statsData.data.completedOrders}</Typography>
+              <Typography variant={"overline"}>Completed Orders</Typography>
+              <Stack spacing={0}>
+                <Typography variant={"overline"} p={0} m={0}>
+                  Incomplete Orders: {statsData.data.unfinishedOrders}
+                </Typography>
+                <Typography variant={"overline"} p={0} m={0}>
+                  Total Orders: {statsData.data.totalOrders}
+                </Typography>
+              </Stack>
+            </Item>
+          </Grid>
+          <Grid item xs={6} md={1}>
+            <Item>
+              <Typography variant={"h4"}>${statsData.data.totalRevenue}</Typography>
+              <Typography variant={"overline"}>Total Revenue</Typography>
+            </Item>
+          </Grid>
         </Grid>
       )}
     </AdminLayout>

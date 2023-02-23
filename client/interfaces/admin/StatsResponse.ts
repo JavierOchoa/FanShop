@@ -9,4 +9,9 @@ interface Stats {
   totalUsers: number;
   normalUsers: number;
   adminUsers: number;
+  totalOrders: number;
+  completedOrders: number;
+  unfinishedOrders: number;
+  totalRevenue: number;
+  revenue: number;
 }

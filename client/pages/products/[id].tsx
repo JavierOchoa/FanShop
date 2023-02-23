@@ -112,12 +112,12 @@ export default function ProductPage() {
               </ButtonGroup>
             </Box>
             <Button
-              disabled={buttonStatus}
+              disabled={buttonStatus || productInformation.data.stock === 0}
               onClick={handleAddToCart}
               variant={"contained"}
               sx={{ mb: 3 }}
             >
-              Add to cart
+              {productInformation.data.stock === 0 ? "Out of Stock" : "Add to cart"}
             </Button>
             <Box>
               <Typography variant={"body1"} fontWeight={"bold"}>
