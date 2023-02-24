@@ -8,7 +8,6 @@ import { CheckoutLayout } from "../../layouts";
 import {
   useGetUserAddressesQuery,
   useGetOrderQuery,
-  useGetOrderStatusQuery,
 } from "../../redux/services";
 import { ArrowBack, Add } from "@mui/icons-material";
 import { AddressCard, CompletedOrder, OrderResume } from "../../components/Checkout";
@@ -36,10 +35,10 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
   const { payWithPaypal } = useCheckout();
   const [pollingInterval, setPollingInterval] = useState<number>(initialPolling);
   const { data: orderInformation, isLoading: loadingOrderInformation } = useGetOrderQuery(
-    id ?? skipToken
+    id ?? skipToken,
+    { pollingInterval }
   );
   const { data: userAddresses, isLoading: loadingUserAddress } = useGetUserAddressesQuery();
-  const { data: orderStatus } = useGetOrderStatusQuery(id ?? skipToken, { pollingInterval });
   const [activeStep, setActiveStep] = useState<number>(0);
   const [addressToEdit, setAddressToEdit] = useState<AddressBody>(bodyInitialState);
   const [openForm, setOpenForm] = useState<boolean>(false);
@@ -90,18 +89,13 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
     return <Box>Redirecting...</Box>;
   }
 
-  if (orderStatus && orderStatus.data === "completed" && pollingInterval !== initialPolling) {
-    router.reload();
-    return <Box>Redirecting...</Box>;
-  }
-
   return (
     <CheckoutLayout
       title={"Checkout Page"}
       pageDescription={"Page for reviewing cart, select shipping information and make payment"}
     >
-      {orderInformation && orderStatus?.data === "completed" && (
-        <CompletedOrder order={orderInformation!.data} />
+      {orderInformation && orderInformation?.data.status === "completed" && (
+        <CompletedOrder order={orderInformation.data} />
       )}
       {orderInformation?.data.status !== "completed" && (
         <Box>
@@ -191,7 +185,7 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
                     <Box display={"flex"} flexDirection={"column"} alignItems={"center"}>
                       <LoadingButton
                         loading={
-                          orderStatus?.data === "incomplete"
+                          orderInformation?.data.status === "incomplete"
                             ? false
                             : pollingInterval !== initialPolling
                         }
