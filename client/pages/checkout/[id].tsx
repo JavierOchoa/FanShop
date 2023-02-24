@@ -100,9 +100,9 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
       title={"Checkout Page"}
       pageDescription={"Page for reviewing cart, select shipping information and make payment"}
     >
-      {orderInformation && orderStatus?.data === "completed" && (
-        <CompletedOrder order={orderInformation!.data} />
-      )}
+      {orderInformation &&
+        orderStatus?.data === "completed" &&
+        pollingInterval === initialPolling && <CompletedOrder order={orderInformation!.data} />}
       {orderInformation?.data.status !== "completed" && (
         <Box>
           <CheckoutStepper step={activeStep} stepPages={steps} />
