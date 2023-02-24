@@ -91,13 +91,13 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
     return <Box>Redirecting...</Box>;
   }
 
-  // if (orderStatus && orderStatus.data === "completed") {
-  //   if (pollingInterval !== initialPolling) {
-  //     console.log(pollingInterval !== initialPolling);
-  //     router.reload();
-  //     return <Box>Loading Order Information...</Box>;
-  //   }
-  // }
+  if (orderInformation && orderInformation.data.status === "completed") {
+    if (pollingInterval !== initialPolling) {
+      console.log(pollingInterval !== initialPolling);
+      router.reload();
+      return <Box>Loading Order Information...</Box>;
+    }
+  }
 
   return (
     <CheckoutLayout
