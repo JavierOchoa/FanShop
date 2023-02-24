@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, Grid, Paper, Typography } from "@mui/mat
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CheckoutStepper, AddressForm } from "../../components";
-import { GetStaticProps, NextPage } from "next";
+import { NextPage } from "next";
 import { AddressBody, CountryListResponse } from "../../interfaces";
 import { CheckoutLayout } from "../../layouts";
 import {
@@ -241,21 +241,21 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<{ countryList: CountryListResponse[] }> = async () => {
+CheckoutPage.getInitialProps = async () => {
   // try {
   const res = await fetch("https://restcountries.com/v2/all?fields=name");
   const data: CountryListResponse[] = await res.json();
   return {
-    props: {
-      countryList: data,
-    },
+    // props: {
+    countryList: data,
+    // },
   };
   // } catch (e) {
   //   console.log(e);
   //   return {
   //     props: {
-  //       countryList: e,
-  //     },
+  //       countryList: e
+  //     }
   //   };
   // }
 };
