@@ -2,22 +2,16 @@ import { Box, Button, CircularProgress, Grid, Paper, Typography } from "@mui/mat
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CheckoutStepper, AddressForm } from "../../components";
-import { NextPage } from "next";
-import { AddressBody, CountryListResponse } from "../../interfaces";
+// import { NextPage } from "next";
+import countryList from "./../../public/countries.json";
+import { AddressBody } from "../../interfaces";
 import { CheckoutLayout } from "../../layouts";
-import {
-  useGetUserAddressesQuery,
-  useGetOrderQuery,
-} from "../../redux/services";
+import { useGetUserAddressesQuery, useGetOrderQuery } from "../../redux/services";
 import { ArrowBack, Add } from "@mui/icons-material";
 import { AddressCard, CompletedOrder, OrderResume } from "../../components/Checkout";
 import { skipToken } from "@reduxjs/toolkit/query/react";
 import { LoadingButton } from "@mui/lab";
 import useCheckout from "../../utils/hooks/useCheckout";
-
-interface Props {
-  countryList: CountryListResponse[];
-}
 
 const steps = ["Shipping Address", "Confirm Payment"];
 const initialPolling = 600000;
@@ -29,7 +23,7 @@ const bodyInitialState: AddressBody = {
   state: "",
   country: "",
 };
-const CheckoutPage: NextPage<Props> = ({ countryList }) => {
+const CheckoutPage = () => {
   const router = useRouter();
   const id = router.query.id as string;
   const { payWithPaypal } = useCheckout();
@@ -233,14 +227,6 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
       )}
     </CheckoutLayout>
   );
-};
-
-CheckoutPage.getInitialProps = async () => {
-  const res = await fetch("https://restcountries.com/v2/all?fields=name");
-  const data: CountryListResponse[] = await res.json();
-  return {
-    countryList: data,
-  };
 };
 
 export default CheckoutPage;
