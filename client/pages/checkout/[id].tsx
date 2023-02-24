@@ -1,8 +1,8 @@
 import { Box, Button, CircularProgress, Grid, Paper, Typography } from "@mui/material";
 import { useRouter } from "next/router";
-import { FC, PropsWithChildren, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckoutStepper, AddressForm } from "../../components";
-import { GetServerSideProps } from "next";
+import { NextPage } from "next";
 import { AddressBody, CountryListResponse } from "../../interfaces";
 import { CheckoutLayout } from "../../layouts";
 import {
@@ -30,7 +30,7 @@ const bodyInitialState: AddressBody = {
   state: "",
   country: "",
 };
-const CheckoutPage: FC<PropsWithChildren<Props>> = ({ countryList }) => {
+const CheckoutPage: NextPage<Props> = ({ countryList }) => {
   const router = useRouter();
   const id = router.query.id as string;
   const { payWithPaypal } = useCheckout();
@@ -241,14 +241,11 @@ const CheckoutPage: FC<PropsWithChildren<Props>> = ({ countryList }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+CheckoutPage.getInitialProps = async () => {
   const res = await fetch("https://restcountries.com/v2/all?fields=name");
   const data: CountryListResponse[] = await res.json();
-
   return {
-    props: {
-      countryList: data,
-    },
+    countryList: data,
   };
 };
 

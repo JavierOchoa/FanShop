@@ -38,7 +38,6 @@ export default function useCheckout() {
     setCheckoutError(undefined);
     try {
       const { successful, message, data } = await newOrder(cartItems).unwrap();
-      console.log(data);
       if (successful) {
         await router.push(`/checkout/${data}`);
       } else {
