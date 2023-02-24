@@ -90,9 +90,11 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
     return <Box>Redirecting...</Box>;
   }
 
-  if (orderStatus && orderStatus.data === "completed" && pollingInterval !== initialPolling) {
-    router.reload();
-    return <Box>Redirecting...</Box>;
+  if (orderStatus && orderStatus.data === "completed") {
+    if (pollingInterval !== initialPolling) {
+      router.reload();
+      return <Box>Loading Order Information...</Box>;
+    }
   }
 
   return (
@@ -102,7 +104,7 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
     >
       {orderInformation &&
         orderStatus?.data === "completed" &&
-        pollingInterval === initialPolling && <CompletedOrder order={orderInformation!.data} />}
+        pollingInterval === initialPolling && <CompletedOrder order={orderInformation.data} />}
       {orderInformation?.data.status !== "completed" && (
         <Box>
           <CheckoutStepper step={activeStep} stepPages={steps} />
