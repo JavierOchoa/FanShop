@@ -242,14 +242,22 @@ const CheckoutPage: FC<PropsWithChildren<Props>> = ({ countryList }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const res = await fetch("https://restcountries.com/v2/all?fields=name");
-  const data: CountryListResponse[] = await res.json();
-
-  return {
-    props: {
-      countryList: data,
-    },
-  };
+  try {
+    const res = await fetch("https://restcountries.com/v2/all?fields=name");
+    const data: CountryListResponse[] = await res.json();
+    return {
+      props: {
+        countryList: data,
+      },
+    };
+  } catch (e) {
+    console.log(e);
+    return {
+      props: {
+        countryList: e,
+      },
+    };
+  }
 };
 
 export default CheckoutPage;
