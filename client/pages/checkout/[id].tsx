@@ -8,7 +8,6 @@ import { CheckoutLayout } from "../../layouts";
 import {
   useGetUserAddressesQuery,
   useGetOrderQuery,
-  // useGetOrderStatusQuery,
 } from "../../redux/services";
 import { ArrowBack, Add } from "@mui/icons-material";
 import { AddressCard, CompletedOrder, OrderResume } from "../../components/Checkout";
@@ -40,7 +39,6 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
     { pollingInterval }
   );
   const { data: userAddresses, isLoading: loadingUserAddress } = useGetUserAddressesQuery();
-  // const { data: orderStatus } = useGetOrderStatusQuery(id ?? skipToken, { pollingInterval });
   const [activeStep, setActiveStep] = useState<number>(0);
   const [addressToEdit, setAddressToEdit] = useState<AddressBody>(bodyInitialState);
   const [openForm, setOpenForm] = useState<boolean>(false);
@@ -89,14 +87,6 @@ const CheckoutPage: NextPage<Props> = ({ countryList }) => {
   if (orderInformation && orderInformation.successful === false) {
     router.push("/").catch((e) => console.log(e));
     return <Box>Redirecting...</Box>;
-  }
-
-  if (orderInformation && orderInformation.data.status === "completed") {
-    if (pollingInterval !== initialPolling) {
-      console.log(pollingInterval !== initialPolling);
-      router.reload();
-      return <Box>Loading Order Information...</Box>;
-    }
   }
 
   return (
