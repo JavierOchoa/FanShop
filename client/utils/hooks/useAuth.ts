@@ -3,14 +3,14 @@ import { getCookie, removeCookie, setCookie } from "typescript-cookie";
 import { useAppSelector, useAppDispatch } from "./index";
 import { setToken, setUser } from "../../redux/slices";
 import { useGetUserInfoMutation, useLoginMutation, useSignUpMutation } from "../../redux/services";
-import { LoginRequest, SignUpRequest } from "../../interfaces";
+import { LoginRequest, SignUpRequest, UserInfo } from "../../interfaces";
 import { useRouter } from "next/router";
 
 export default function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.auth.user) as UserInfo;
   const [getUserInfo, { data: userInfo }] = useGetUserInfoMutation();
   const [login, { data: loginResponse, isLoading: loginRequestLoading }] = useLoginMutation();
   const [signup, { data: signupResponse, isLoading: signUpRequestLoading }] = useSignUpMutation();
