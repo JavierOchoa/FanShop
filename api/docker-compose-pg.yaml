@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:14.3
+    restart: always
+    ports:
+      - "${PGPORT}:5432"
+    environment:
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
+    container_name: fanshopdb
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
